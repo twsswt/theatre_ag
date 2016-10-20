@@ -1,2 +1,2 @@
-from .actor import Actor, ActorExhaustedException
+from .actor import Actor, default_cost
 from .clock import AbstractClock, ManualClock
