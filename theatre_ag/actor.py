@@ -11,7 +11,7 @@ class Task(object):
         self.args = args
 
     def __repr__(self):
-        return "t_(%s, %s)" %(str(self.func), self.args)
+        return "t_(%s, %s)" % (str(self.func), self.args)
 
 
 def workflow(cost=0, enabled=True):
@@ -38,7 +38,7 @@ class Actor(object):
         self.completed_tasks = []
         self.task_queue = Queue()
 
-    def allocate_task(self, func, args=[]):
+    def allocate_task(self, func, args=list()):
         self.task_queue.put(Task(func, args))
 
     def perform(self):
@@ -89,5 +89,4 @@ class Actor(object):
         self.clock.set_alarm(start_tick + cost)
 
     @workflow(1)
-    def idle(self):
-        pass
+    def idle(self): pass

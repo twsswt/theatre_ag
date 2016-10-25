@@ -1,5 +1,5 @@
 """
-@author Tim Storer
+@author twsswt
 """
 
 
@@ -26,7 +26,7 @@ class AbstractClock(object):
             if alarm[0] <= self.ticks:
                 alarm[1].set()
 
-    def set_alarm (self, time):
+    def set_alarm(self, time):
         event = Event()
         alarm = (time, event)
         self.alarms.append(alarm)
@@ -46,5 +46,5 @@ class ManualClock(AbstractClock):
 class SystemTimeClock(AbstractClock):
 
     def __init__(self, max_ticks=1):
-        ManualClock.__init__(self, max_ticks)
+        AbstractClock.__init__(self, max_ticks)
 
