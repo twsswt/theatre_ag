@@ -17,7 +17,7 @@ class AbstractClock(object):
     def current_tick(self):
         return self.ticks
 
-    def _tick (self):
+    def _tick(self):
         self.ticks += 1
         self._check_alarms()
 

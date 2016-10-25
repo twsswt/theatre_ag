@@ -38,7 +38,7 @@ class Actor(object):
         self.completed_tasks = []
         self.task_queue = Queue()
 
-    def add_to_task_queue(self, func, args=[]):
+    def allocate_task(self, func, args=[]):
         self.task_queue.put(Task(func, args))
 
     def perform(self):
@@ -57,19 +57,23 @@ class Actor(object):
 
         attribute = object.__getattribute__(self, item)
 
-        if hasattr(attribute, 'enabled'):
-            if inspect.ismethod(attribute):
-                def sync_wrap(*args, **kwargs):
-                    self.busy.acquire()
+        if hasattr(attribute, 'enabled') and inspect.ismethod(attribute):
+            def sync_wrap(*args, **kwargs):
+                self.busy.acquire()
 
-                    reference_func = attribute.im_func
-                    result = reference_func(self, *args, **kwargs)
-                    self.completed_tasks.append((attribute, self.clock.current_tick))
+                reference_func = attribute.im_func
 
-                    self.busy.release()
-                    return result
+                cost = attribute.cost
+                # TODO Pass function name and indicative cost to a cost calculation function.
+                self._incur_cost(cost)
 
-                return sync_wrap
+                result = reference_func(self, *args, **kwargs)
+                self.completed_tasks.append((attribute, self.clock.current_tick))
+
+                self.busy.release()
+                return result
+
+            return sync_wrap
         else:
             return attribute
 

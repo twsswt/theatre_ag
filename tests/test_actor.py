@@ -18,7 +18,7 @@ class ActorTestCase(TestCase):
 
     def test_idle(self):
         self.clock.current_tick = 0
-        self.actor.add_to_task_queue(Actor.idle, [])
+        self.actor.allocate_task(self.actor.idle, [])
         self.clock.current_tick = 1
         self.actor.start()
         self.actor.shutdown()
@@ -45,7 +45,7 @@ class ActorTestCase(TestCase):
         self.actor = ExampleActor("alice", self.clock)
 
         self.clock.current_tick = 0
-        self.actor.add_to_task_queue(self.actor.task_a, [])
+        self.actor.allocate_task(self.actor.task_a, [])
         self.clock.current_tick = 1
         self.actor.start()
         self.actor.shutdown()
