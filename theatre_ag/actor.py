@@ -1,4 +1,6 @@
-from Queue import Queue
+import inspect
+
+from Queue import Queue, Empty
 from threading import RLock, Thread
 
 
@@ -9,16 +11,15 @@ class Task(object):
         self.args = args
 
     def __repr__(self):
-        return "t_(%s, %d)" %(str(self.func), self.cost)
+        return "t_(%s, %s)" %(str(self.func), self.args)
 
 
-class default_cost(object):
-
-    def __init__(self, cost):
-        self.cost = cost
-
-    def __call__(self, func):
+def workflow(cost=0, enabled=True):
+    def workflow_decorator(func):
+        func.enabled = enabled
+        func.cost = cost
         return func
+    return workflow_decorator
 
 
 class Actor(object):
@@ -45,24 +46,32 @@ class Actor(object):
         Repeatedly polls the actor's asynchronous work queue.
         """
         while self.wait_for_directions or not self.task_queue.empty():
-            task = self.task_queue.get(block=False)
-            if task is not None:
-                self.perform_task(task.func, task.args)
+            try:
+                task = self.task_queue.get(block=False)
+                if task is not None:
+                    task.func(*task.args)
+            except Empty:
+                pass
 
-    def perform_task(self, task, args=[]):
+    def __getattribute__(self, item):
 
-        self.busy.acquire()
+        attribute = object.__getattribute__(self, item)
 
-        if hasattr(task, 'default_cost'):
-            self._incur_cost(task.default_cost)
+        if hasattr(attribute, 'enabled'):
+            if inspect.ismethod(attribute):
+                def sync_wrap(*args, **kwargs):
+                    self.busy.acquire()
 
-        args.insert(0, self)
+                    reference_func = attribute.im_func
+                    result = reference_func(self, *args, **kwargs)
+                    self.completed_tasks.append((attribute, self.clock.current_tick))
 
-        task(*args)
+                    self.busy.release()
+                    return result
 
-        self.completed_tasks.append((task, self.clock.current_tick))
-
-        self.busy.release()
+                return sync_wrap
+        else:
+            return attribute
 
     def start(self):
         self.thread.start()
@@ -75,6 +84,6 @@ class Actor(object):
         start_tick = self.clock.current_tick
         self.clock.set_alarm(start_tick + cost)
 
-    @default_cost(1)
+    @workflow(1)
     def idle(self):
         pass

@@ -3,7 +3,9 @@ from unittest import TestCase
 
 from threading import Thread
 
-from theatre_ag import Actor, AbstractClock
+import inspect
+
+from theatre_ag import Actor, AbstractClock, workflow
 
 
 class ActorTestCase(TestCase):
@@ -25,14 +27,25 @@ class ActorTestCase(TestCase):
 
     def test_nested_task(self):
 
-        def task_a(self):
-            self.perform_task(task_b, [])
+        class ExampleWorkflow(object):
 
-        def task_b(self):
-            self.perform_task(Actor.idle)
+            @workflow(1)
+            def task_a(self):
+                self.task_b()
+
+            @workflow(1)
+            def task_b(self):
+                self.idle()
+
+        class ExampleActor(ExampleWorkflow, Actor):
+
+            def __init__(self, *args):
+                Actor.__init__(self, *args)
+
+        self.actor = ExampleActor("alice", self.clock)
 
         self.clock.current_tick = 0
-        self.actor.add_to_task_queue(task_a, [])
+        self.actor.add_to_task_queue(self.actor.task_a, [])
         self.clock.current_tick = 1
         self.actor.start()
         self.actor.shutdown()
