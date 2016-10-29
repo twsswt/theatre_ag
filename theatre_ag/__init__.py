@@ -1,2 +1,2 @@
-from .actor import Actor, workflow
-from .clock import AbstractClock, ManualClock
+from .actor import Actor, Idle, workflow
+from .clock import SynchronizingClock

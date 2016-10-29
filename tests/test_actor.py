@@ -1,39 +1,37 @@
-from mock import Mock
 from unittest import TestCase
 
-from threading import Thread
-
-import inspect
-
-from theatre_ag import Actor, AbstractClock, workflow
+from theatre_ag import Actor, Idle, SynchronizingClock, workflow
 
 
 class ActorTestCase(TestCase):
 
     def setUp(self):
 
-        self.clock = Mock(spec=AbstractClock)
+        self.clock = SynchronizingClock()
 
-        self.actor = Actor("alice", self.clock)
+        class IdlingActor(Idle, Actor):
+            def __init__(self, logical_name, clock):
+                Actor.__init__(self, logical_name, clock)
+
+        self.actor = IdlingActor("alice", self.clock)
 
     def test_idle(self):
-        self.clock.current_tick = 0
         self.actor.allocate_task(self.actor.idle, [])
-        self.clock.current_tick = 1
         self.actor.start()
+        self.clock.tick()
         self.actor.shutdown()
 
         self.assertEquals(True, True)
 
     def test_nested_task(self):
 
-        class ExampleWorkflow(object):
+        class ExampleWorkflow(Idle):
 
             @workflow(1)
             def task_a(self):
                 self.task_b()
 
-            @workflow(1)
+            @workflow(2)
             def task_b(self):
                 self.idle()
 
@@ -43,12 +41,13 @@ class ActorTestCase(TestCase):
                 Actor.__init__(self, *args)
 
         self.actor = ExampleActor("alice", self.clock)
-
-        self.clock.current_tick = 0
         self.actor.allocate_task(self.actor.task_a, [])
-        self.clock.current_tick = 1
         self.actor.start()
+        self.clock.tick()
+        self.clock.tick()
+        self.clock.tick()
+        self.clock.tick()
         self.actor.shutdown()
 
-        self.assertEquals(True, True)
+        self.assertEquals(self.actor.completed_tasks[1][1], 4)
 

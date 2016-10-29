@@ -1,7 +1,7 @@
 import inspect
 
 from Queue import Queue, Empty
-from threading import RLock, Thread
+from threading import Event, RLock, Thread
 
 
 class Task(object):
@@ -30,6 +30,7 @@ class Actor(object):
     def __init__(self, logical_name, clock):
         self.logical_name = logical_name
         self.clock = clock
+        self.clock.add_tick_listener(self)
 
         self.busy = RLock()
         self.wait_for_directions = True
@@ -37,6 +38,13 @@ class Actor(object):
 
         self.completed_tasks = []
         self.task_queue = Queue()
+
+        self.tick_received = Event()
+        self.tick_received.clear()
+        self.waiting_for_tick = Event()
+        self.waiting_for_tick.set()
+
+        self.next_turn = 0
 
     def allocate_task(self, func, args=list()):
         self.task_queue.put(Task(func, args))
@@ -61,16 +69,16 @@ class Actor(object):
             def sync_wrap(*args, **kwargs):
                 self.busy.acquire()
 
-                reference_func = attribute.im_func
-
-                cost = attribute.cost
                 # TODO Pass function name and indicative cost to a cost calculation function.
-                self._incur_cost(cost)
+                self.next_turn += attribute.cost
 
-                result = reference_func(self, *args, **kwargs)
+                self.wait_for_turn()
+
+                result = attribute.im_func(self, *args, **kwargs)
                 self.completed_tasks.append((attribute, self.clock.current_tick))
 
                 self.busy.release()
+
                 return result
 
             return sync_wrap
@@ -84,9 +92,21 @@ class Actor(object):
         self.wait_for_directions = False
         self.thread.join()
 
-    def _incur_cost(self, cost):
-        start_tick = self.clock.current_tick
-        self.clock.set_alarm(start_tick + cost)
+    def wait_for_turn(self):
+        while self.clock.current_tick < self.next_turn:
+            self.waiting_for_tick.set()
+            self.tick_received.wait()
+            self.tick_received.clear()
+            self.waiting_for_tick.clear()
+
+    def notify_new_tick(self):
+        self.tick_received.set()
+
+
+class Idle(object):
+    """
+    A workflow that allows an actor to waste a turn.
+    """
 
     @workflow(1)
     def idle(self): pass
