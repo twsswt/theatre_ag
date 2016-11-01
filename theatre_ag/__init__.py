@@ -1,2 +1,2 @@
-from .actor import Actor, Idle, workflow
+from .actor import Actor, Idle, Workflow, default_cost
 from .clock import SynchronizingClock

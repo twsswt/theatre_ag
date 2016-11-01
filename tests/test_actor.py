@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from theatre_ag import Actor, Idle, SynchronizingClock, workflow
+from theatre_ag import Actor, Idle, SynchronizingClock, Workflow, default_cost
 
 
 class ActorTestCase(TestCase):
@@ -9,39 +9,38 @@ class ActorTestCase(TestCase):
 
         self.clock = SynchronizingClock()
 
-        class IdlingActor(Idle, Actor):
-            def __init__(self, logical_name, clock):
-                Actor.__init__(self, logical_name, clock)
-
-        self.actor = IdlingActor("alice", self.clock)
+        self.actor = Actor("alice", self.clock)
 
     def test_idle(self):
-        self.actor.allocate_task(self.actor.idle, [])
+        idle = Idle(self.actor)
+        self.actor.allocate_task(idle.idle, [])
         self.actor.start()
+        self.clock.tick()
         self.clock.tick()
         self.actor.shutdown()
 
-        self.assertEquals(True, True)
+        self.assertEquals(self.actor.last_completed_task.finish_tick, 1)
 
     def test_nested_task(self):
 
-        class ExampleWorkflow(Idle):
+        class ExampleWorkflow(Workflow):
 
-            @workflow(1)
+            def __init__(self, actor, idle):
+                Workflow.__init__(self, actor)
+                self.idle = idle
+
+            @default_cost(1)
             def task_a(self):
                 self.task_b()
 
-            @workflow(2)
+            @default_cost(1)
             def task_b(self):
-                self.idle()
+                self.idle.idle()
 
-        class ExampleActor(ExampleWorkflow, Actor):
+        workflow = ExampleWorkflow(self.actor, Idle(self.actor))
 
-            def __init__(self, *args):
-                Actor.__init__(self, *args)
+        self.actor.allocate_task(workflow.task_a, [])
 
-        self.actor = ExampleActor("alice", self.clock)
-        self.actor.allocate_task(self.actor.task_a, [])
         self.actor.start()
         self.clock.tick()
         self.clock.tick()
@@ -49,5 +48,5 @@ class ActorTestCase(TestCase):
         self.clock.tick()
         self.actor.shutdown()
 
-        self.assertEquals(self.actor.completed_tasks[1][1], 4)
+        self.assertEquals(self.actor.last_completed_task.finish_tick, 3)
 
