@@ -131,6 +131,10 @@ class Actor(object):
             except Empty:
                 self.idle.idle()
 
+        # Ensure that clock can proceed for other listeners.
+        self.clock.remove_tick_listener(self)
+        self.waiting_for_tick.set()
+
     def start(self):
         self.thread.start()
 
@@ -151,4 +155,3 @@ class Actor(object):
     def notify_new_tick(self):
         self.tick_received.set()
         self.waiting_for_tick.clear()
-
