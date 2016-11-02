@@ -55,9 +55,7 @@ class Workflow(object):
                 # TODO Pass function name and indicative cost to a cost calculation function.
                 if hasattr(attribute, 'default_cost'):
                     self.actor.incur_delay(attribute.default_cost)
-
                 self.actor.wait_for_turn()
-
                 result = attribute.im_func(self, *args, **kwargs)
                 finish_tick = self.actor.clock.current_tick
 
@@ -65,7 +63,6 @@ class Workflow(object):
                     self.actor.completed_tasks.append(CompletedTask(attribute, start_tick, finish_tick))
 
                 self.actor.busy.release()
-
                 return result
 
             return sync_wrap
@@ -90,19 +87,20 @@ class Actor(object):
     def __init__(self, logical_name, clock):
         self.logical_name = logical_name
         self.clock = clock
-        self.clock.add_tick_listener(self)
-
-        self.busy = RLock()
-        self.wait_for_directions = True
-        self.thread = Thread(target=self.perform)
-
-        self.completed_tasks = []
-        self.task_queue = Queue()
 
         self.tick_received = Event()
         self.tick_received.clear()
         self.waiting_for_tick = Event()
         self.waiting_for_tick.clear()
+
+        self.busy = RLock()
+        self.wait_for_directions = True
+        self.thread = Thread(target=self.perform)
+
+        self.clock.add_tick_listener(self)
+
+        self.completed_tasks = []
+        self.task_queue = Queue()
 
         self.idle = Idle(self, logging=False)
 
@@ -155,3 +153,6 @@ class Actor(object):
     def notify_new_tick(self):
         self.tick_received.set()
         self.waiting_for_tick.clear()
+
+    def __str__(self):
+        return self.logical_name

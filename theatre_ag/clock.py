@@ -21,7 +21,6 @@ class SynchronizingClock(object):
         self.tick_listeners.remove(listener)
 
     def tick(self):
-        print self.current_tick
         # Issue a tick once all listeners are waiting for them.
         for tick_listener in self.tick_listeners:
             tick_listener.waiting_for_tick.wait()
