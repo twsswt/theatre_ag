@@ -1,6 +1,7 @@
 """
 @author twsswt
 """
+from threading import Thread
 
 
 class SynchronizingClock(object):
@@ -9,10 +10,19 @@ class SynchronizingClock(object):
         self.max_ticks = max_ticks
         self._ticks = 0
         self.tick_listeners = list()
+        self.issue_ticks = True
+        self._thread = Thread(target=self.tick_toc)
 
     @property
     def current_tick(self):
         return self._ticks
+
+    def start(self):
+        self._thread.start()
+
+    def shutdown(self):
+        self.issue_ticks = False
+        self._thread.join()
 
     def add_tick_listener(self, listener):
         self.tick_listeners.append(listener)
@@ -30,5 +40,5 @@ class SynchronizingClock(object):
             tick_listener.notify_new_tick()
 
     def tick_toc(self):
-        while self.current_tick < self.max_ticks:
+        while self.issue_ticks and self.current_tick < self.max_ticks:
             self.tick()
