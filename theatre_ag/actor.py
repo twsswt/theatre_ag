@@ -4,16 +4,6 @@ from Queue import Queue, Empty
 from threading import Event, RLock, Thread
 
 
-class Task(object):
-
-    def __init__(self, func, args):
-        self.func = func
-        self.args = args
-
-    def __repr__(self):
-        return "t_(%s, %s)" % (str(self.func), self.args)
-
-
 def default_cost(cost=0):
     def workflow_decorator(func):
         func.default_cost = cost
@@ -21,12 +11,29 @@ def default_cost(cost=0):
     return workflow_decorator
 
 
+class Task(object):
+
+    def __init__(self, entry_point, args):
+        self.entry_point = entry_point
+        self.args = args
+
+    def __repr__(self):
+        return "t_(%s, %s)" % (str(self.entry_point), self.args)
+
+
 class CompletedTask(object):
 
-    def __init__(self, func, start_tick, finish_tick):
+    def __init__(self, func, parent, start_tick):
+        self.parent = parent
+        self.sub_tasks = list()
+
         self.func = func
         self.start_tick = start_tick
-        self.finish_tick = finish_tick
+        self.finish_tick = -1
+
+    def append_sub_task(self, sub_task):
+        self.sub_tasks.append(sub_task)
+        pass
 
     def __str__(self):
         return "%s(%d->%d)" % (self.func.func_name, self.start_tick, self.finish_tick)
@@ -50,17 +57,21 @@ class Workflow(object):
             def sync_wrap(*args, **kwargs):
                 self.actor.busy.acquire()
 
-                start_tick = self.actor.clock.current_tick
+                if self.logging:
+                    self.actor.log_task_initiation(attribute)
 
                 # TODO Pass function name and indicative cost to a cost calculation function.
                 if hasattr(attribute, 'default_cost'):
                     self.actor.incur_delay(attribute.default_cost)
+
                 self.actor.wait_for_turn()
+
+
+
                 result = attribute.im_func(self, *args, **kwargs)
-                finish_tick = self.actor.clock.current_tick
 
                 if self.logging:
-                    self.actor.completed_tasks.append(CompletedTask(attribute, start_tick, finish_tick))
+                    self.actor.log_task_completion()
 
                 self.actor.busy.release()
                 return result
@@ -70,7 +81,7 @@ class Workflow(object):
             return attribute
 
 
-class Idle(Workflow):
+class Idling(Workflow):
     """
     A workflow that allows an actor to waste a turn.
     """
@@ -88,6 +99,8 @@ class Actor(object):
         self.logical_name = logical_name
         self.clock = clock
 
+        self.repertoire = list()
+
         self.tick_received = Event()
         self.tick_received.clear()
         self.waiting_for_tick = Event()
@@ -100,14 +113,35 @@ class Actor(object):
         self.clock.add_tick_listener(self)
 
         self.completed_tasks = []
+        self.current_task = None
+
         self.task_queue = Queue()
 
-        self.idle = Idle(self, logging=False)
+        self.idling = Idling(self, logging=False)
 
         self.next_turn = 0
 
-    def allocate_task(self, func, args=list()):
-        self.task_queue.put(Task(func, args))
+    def add_workflow(self, workflow_constructor, *args):
+        workflow = workflow_constructor(self, *args)
+        self.repertoire.append(workflow)
+        return workflow
+
+    def allocate_task(self, entry_point, args=list()):
+        self.task_queue.put(Task(entry_point, args))
+
+    def log_task_initiation(self, attribute):
+        new_task = CompletedTask(attribute, self.current_task, self.clock.current_tick)
+
+        if self.current_task is None:
+            self.completed_tasks.append(new_task)
+        else:
+            self.current_task.append_sub_task(new_task)
+
+        self.current_task = new_task
+
+    def log_task_completion(self):
+        self.current_task.finish_tick = self.clock.current_tick
+        self.current_task = self.current_task.parent
 
     @property
     def last_completed_task(self):
@@ -125,9 +159,9 @@ class Actor(object):
             try:
                 task = self.task_queue.get(block=False)
                 if task is not None:
-                    task.func(*task.args)
+                    task.entry_point(*task.args)
             except Empty:
-                self.idle.idle()
+                self.idling.idle()
 
         # Ensure that clock can proceed for other listeners.
         self.clock.remove_tick_listener(self)
