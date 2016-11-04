@@ -11,28 +11,26 @@ class ActorTestCase(TestCase):
 
         self.clock = SynchronizingClock(max_ticks=4)
 
-        self.clock_thread = Thread(target=self.clock.tick_toc)
-
-        self.actor_1 = Actor("alice", self.clock)
-        self.actor_2 = Actor("bob", self.clock)
-
     def test_idle(self):
-        idle = Idling(self.actor_1)
-        self.actor_1.allocate_task(idle.idle, [])
-        self.actor_1.start()
-        self.actor_2.start()
-        self.clock_thread.start()
-        self.actor_1.shutdown()
-        self.actor_2.shutdown()
 
-        self.assertEquals(self.actor_1.last_completed_task.finish_tick, 1)
+        actor_1 = Actor("alice", self.clock)
+
+        idling = Idling(actor_1, logging=True)
+        actor_1.allocate_task(idling, idling.idle, [])
+        actor_1.start()
+        self.clock.start()
+        actor_1.shutdown()
+
+        self.assertEquals(1, actor_1.last_completed_task.finish_tick)
 
     def test_nested_task(self):
 
+        actor_1 = Actor("alice", self.clock)
+
         class ExampleWorkflow(Workflow):
 
-            def __init__(self, actor, idle):
-                Workflow.__init__(self, actor)
+            def __init__(self, idle):
+                super(ExampleWorkflow, self).__init__(self)
                 self.idle = idle
 
             @default_cost(1)
@@ -43,32 +41,34 @@ class ActorTestCase(TestCase):
             def task_b(self):
                 self.idle.idle()
 
-        workflow = ExampleWorkflow(self.actor_1, Idling(self.actor_1))
+        workflow = ExampleWorkflow(Idling(actor_1))
 
-        self.actor_1.allocate_task(workflow.task_a, [])
+        actor_1.allocate_task(workflow, workflow.task_a, [])
 
-        self.actor_1.start()
-        self.actor_2.start()
-        self.clock_thread.start()
-        self.actor_1.shutdown()
-        self.actor_2.shutdown()
+        actor_1.start()
+        self.clock.start()
+        actor_1.shutdown()
 
-        self.assertEquals(self.actor_1.last_completed_task.finish_tick, 3)
+        self.assertEquals(actor_1.last_completed_task.finish_tick, 3)
 
     def test_multiple_actors(self):
-        idle_1 = Idling(self.actor_1)
-        self.actor_1.allocate_task(idle_1.idle, [])
-        idle_2 = Idling(self.actor_2)
-        self.actor_2.allocate_task(idle_2.idle, [])
 
-        self.actor_1.start()
-        self.actor_2.start()
-        self.clock_thread.start()
-        self.actor_1.shutdown()
-        self.actor_2.shutdown()
+        actor_1 = Actor("alice", self.clock)
+        actor_2 = Actor("bob", self.clock)
 
-        self.assertEquals(self.actor_1.last_completed_task.finish_tick, 1)
-        self.assertEquals(self.actor_2.last_completed_task.finish_tick, 1)
+        idle_1 = Idling(actor_1)
+        actor_1.allocate_task(idle_1, idle_1.idle, [])
+        idle_2 = Idling(actor_2)
+        actor_2.allocate_task(idle_2, idle_2.idle, [])
+
+        actor_1.start()
+        actor_2.start()
+        self.clock.start()
+        actor_1.shutdown()
+        actor_2.shutdown()
+
+        self.assertEquals(actor_1.last_completed_task.finish_tick, 1)
+        self.assertEquals(actor_2.last_completed_task.finish_tick, 1)
 
 
 

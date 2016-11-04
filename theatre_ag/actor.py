@@ -11,14 +11,15 @@ def default_cost(cost=0):
     return workflow_decorator
 
 
-class Task(object):
+class _AllocatedTask(object):
 
-    def __init__(self, entry_point, args):
+    def __init__(self, workflow, entry_point, args):
+        self.workflow = workflow
         self.entry_point = entry_point
         self.args = args
 
     def __repr__(self):
-        return "t_(%s, %s)" % (str(self.entry_point), self.args)
+        return "t_(%s, %s)" % (str(self.workflow), str(self.entry_point), self.args)
 
 
 class CompletedTask(object):
@@ -45,8 +46,8 @@ class CompletedTask(object):
 class Workflow(object):
 
     def __init__(self, actor, logging=True):
-        self.actor = actor
         self.logging = logging
+        self.actor = actor
 
     def __getattribute__(self, item):
 
@@ -56,7 +57,6 @@ class Workflow(object):
 
             def sync_wrap(*args, **kwargs):
                 self.actor.busy.acquire()
-
                 if self.logging:
                     self.actor.log_task_initiation(attribute)
 
@@ -65,8 +65,6 @@ class Workflow(object):
                     self.actor.incur_delay(attribute.default_cost)
 
                 self.actor.wait_for_turn()
-
-
 
                 result = attribute.im_func(self, *args, **kwargs)
 
@@ -99,8 +97,6 @@ class Actor(object):
         self.logical_name = logical_name
         self.clock = clock
 
-        self.repertoire = list()
-
         self.tick_received = Event()
         self.tick_received.clear()
         self.waiting_for_tick = Event()
@@ -118,16 +114,13 @@ class Actor(object):
         self.task_queue = Queue()
 
         self.idling = Idling(self, logging=False)
+        self.idling.actor = self
 
         self.next_turn = 0
 
-    def add_workflow(self, workflow_constructor, *args):
-        workflow = workflow_constructor(self, *args)
-        self.repertoire.append(workflow)
-        return workflow
-
-    def allocate_task(self, entry_point, args=list()):
-        self.task_queue.put(Task(entry_point, args))
+    def allocate_task(self, workflow, entry_point, args=list()):
+        workflow.actor = self
+        self.task_queue.put(_AllocatedTask(workflow, entry_point, args))
 
     def log_task_initiation(self, attribute):
         new_task = CompletedTask(attribute, self.current_task, self.clock.current_tick)
@@ -153,7 +146,8 @@ class Actor(object):
 
     def perform(self):
         """
-        Repeatedly polls the actor's asynchronous work queue.
+        Repeatedly polls the actor's asynchronous work queue until the actor is shutdown.  On shutdown, all remaining
+        tasks are processed before termination.
         """
         while self.wait_for_directions or not self.task_queue.empty():
             try:
