@@ -11,15 +11,31 @@ def default_cost(cost=0):
     return workflow_decorator
 
 
-class _AllocatedTask(object):
+class AllocatedTask(object):
 
     def __init__(self, workflow, entry_point, args):
         self.workflow = workflow
         self.entry_point = entry_point
         self.args = args
 
+        self._completion_information = None
+        self._completion = Event()
+        self._completion.clear()
+
     def __repr__(self):
         return "t_(%s, %s)" % (str(self.workflow), str(self.entry_point), self.args)
+
+    def wait_for_completion(self):
+        self._completion.wait()
+
+    @property
+    def completion_information(self):
+        return self._completion_information
+
+    @completion_information.setter
+    def completion_information(self, value):
+        self._completion_information = value
+        self._completion.set()
 
 
 class CompletedTask(object):
@@ -120,7 +136,9 @@ class Actor(object):
 
     def allocate_task(self, workflow, entry_point, args=list()):
         workflow.actor = self
-        self.task_queue.put(_AllocatedTask(workflow, entry_point, args))
+        allocated_task = AllocatedTask(workflow, entry_point, args)
+        self.task_queue.put(allocated_task)
+        return allocated_task
 
     def log_task_initiation(self, attribute):
         new_task = CompletedTask(attribute, self.current_task, self.clock.current_tick)
@@ -154,6 +172,7 @@ class Actor(object):
                 task = self.task_queue.get(block=False)
                 if task is not None:
                     task.entry_point(*task.args)
+                    task.completion_information = self.last_completed_task
             except Empty:
                 self.idling.idle()
 
