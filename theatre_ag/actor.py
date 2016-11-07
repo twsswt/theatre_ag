@@ -21,7 +21,7 @@ class AllocatedTask(object):
         self.completion_information = None
 
     def __repr__(self):
-        return "t_(%s, %s, %s)" % (str(self.workflow), str(self.entry_point), str(self.args))
+        return "t_(%s, %s)" % (str(self.entry_point.func_name), str(self.args))
 
     @property
     def completed(self):
@@ -79,6 +79,8 @@ class Workflow(object):
 
                 self.actor.busy.release()
                 return result
+
+            sync_wrap.func_name = attribute.im_func.func_name
 
             return sync_wrap
         else:
@@ -164,6 +166,7 @@ class Actor(object):
         while self.wait_for_directions or not self.task_queue.empty():
             try:
                 task = self.task_queue.get(block=False)
+                print task
                 if task is not None:
                     task.entry_point(*task.args)
                     task.completion_information = self.last_completed_task
@@ -196,4 +199,33 @@ class Actor(object):
         self.waiting_for_tick.clear()
 
     def __str__(self):
-        return self.logical_name
+        return "a_%s" % self.logical_name
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class Team(object):
+    """
+    A collection of actors who synchronize their actions on a single clock.
+    """
+
+    def __init__(self, clock):
+        self.clock = clock
+
+        self.team_members = list()
+
+    def add_member(self, logical_name):
+        actor = Actor(logical_name, self.clock)
+        self.team_members.append(actor)
+        return actor
+
+    def perform(self):
+
+        self.allocate_tasks()
+
+        for actor in self.team_members:
+            actor.start()
+
+        for actor in self.team_members:
+            actor.shutdown()
