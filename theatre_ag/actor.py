@@ -18,24 +18,14 @@ class AllocatedTask(object):
         self.entry_point = entry_point
         self.args = args
 
-        self._completion_information = None
-        self._completion = Event()
-        self._completion.clear()
+        self.completion_information = None
 
     def __repr__(self):
-        return "t_(%s, %s)" % (str(self.workflow), str(self.entry_point), self.args)
-
-    def wait_for_completion(self):
-        self._completion.wait()
+        return "t_(%s, %s, %s)" % (str(self.workflow), str(self.entry_point), str(self.args))
 
     @property
-    def completion_information(self):
-        return self._completion_information
-
-    @completion_information.setter
-    def completion_information(self, value):
-        self._completion_information = value
-        self._completion.set()
+    def completed(self):
+        return self.completion_information is not None
 
 
 class CompletedTask(object):
@@ -103,6 +93,10 @@ class Idling(Workflow):
     @default_cost(1)
     def idle(self): pass
 
+    def idle_until(self, allocated_task):
+        while not allocated_task.completed:
+            self.idle()
+
 
 class Actor(object):
     """
@@ -156,11 +150,11 @@ class Actor(object):
 
     @property
     def last_completed_task(self):
-        index = len(self.completed_tasks)
+        index = len(self.completed_tasks)-1
         if index < 0:
-            raise Empty()
+            return None
         else:
-            return self.completed_tasks[len(self.completed_tasks)-1]
+            return self.completed_tasks[index]
 
     def perform(self):
         """

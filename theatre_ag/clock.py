@@ -42,3 +42,6 @@ class SynchronizingClock(object):
     def tick_toc(self):
         while self.issue_ticks and self.current_tick < self.max_ticks:
             self.tick()
+
+    def __str__(self):
+        return "c(%d of %d)" % (self.current_tick, self.max_ticks)
