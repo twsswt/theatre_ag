@@ -166,7 +166,6 @@ class Actor(object):
         while self.wait_for_directions or not self.task_queue.empty():
             try:
                 task = self.task_queue.get(block=False)
-                print task
                 if task is not None:
                     task.entry_point(*task.args)
                     task.completion_information = self.last_completed_task
@@ -229,3 +228,9 @@ class Team(object):
 
         for actor in self.team_members:
             actor.shutdown()
+
+    def allocate_tasks(self):
+        """
+        Implementing classes should over-ride this method to allocate tasks to team members.
+        """
+        pass
