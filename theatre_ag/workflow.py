@@ -24,10 +24,8 @@ def allocate_workflow_to(actor, workflow, logging=True):
     recursively inspected.  Any member with the class attribute 'is_workflow' is also allocated to this actor if it has
     not previously been allocated to another actor.
     """
-
     _workflow_actors[workflow] = (actor, logging)
     workflow_class = workflow.__class__
-
     if workflow_class not in _workflow_classes:
         treat_as_workflow(workflow_class)
         _workflow_classes.add(workflow_class)
@@ -46,11 +44,9 @@ def treat_as_workflow(workflow_class):
 
     reference_get_attr = workflow_class.__getattribute__
 
-    def tracked_getattribute (self, item):
-
+    def __tracked_getattribute (self, item):
         attribute = reference_get_attr(self, item)
-
-        if inspect.ismethod(attribute):
+        if inspect.ismethod(attribute) and not attribute.func_name[0:2] == '__':
 
             def sync_wrap(*args, **kwargs):
 
@@ -79,12 +75,11 @@ def treat_as_workflow(workflow_class):
                     return attribute.im_func(self, *args, **kwargs)
 
             sync_wrap.func_name = attribute.im_func.func_name
-
             return sync_wrap
         else:
             return attribute
 
-    workflow_class.__getattribute__ = tracked_getattribute
+    workflow_class.__getattribute__ = __tracked_getattribute
 
 
 class Idling(object):
