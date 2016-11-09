@@ -2,7 +2,7 @@ from threading import Thread
 
 from unittest import TestCase
 
-from theatre_ag import Actor, Idling, SynchronizingClock, Workflow, default_cost
+from theatre_ag import Actor, Idling, SynchronizingClock, default_cost
 
 
 class ActorTestCase(TestCase):
@@ -15,7 +15,7 @@ class ActorTestCase(TestCase):
 
         actor_1 = Actor("alice", self.clock)
 
-        idling = Idling(actor_1, logging=True)
+        idling = Idling()
         actor_1.allocate_task(idling, idling.idle, [])
         actor_1.start()
         self.clock.start()
@@ -27,11 +27,12 @@ class ActorTestCase(TestCase):
 
         actor_1 = Actor("alice", self.clock)
 
-        class ExampleWorkflow(Workflow):
+        class ExampleWorkflow(object):
 
-            def __init__(self, idle):
-                super(ExampleWorkflow, self).__init__(self)
-                self.idle = idle
+            is_workflow=True
+
+            def __init__(self, idling):
+                self.idling = idling
 
             @default_cost(1)
             def task_a(self):
@@ -39,9 +40,9 @@ class ActorTestCase(TestCase):
 
             @default_cost(1)
             def task_b(self):
-                self.idle.idle()
+                self.idling.idle()
 
-        workflow = ExampleWorkflow(Idling(actor_1))
+        workflow = ExampleWorkflow(Idling())
 
         actor_1.allocate_task(workflow, workflow.task_a, [])
 
@@ -56,9 +57,9 @@ class ActorTestCase(TestCase):
         actor_1 = Actor("alice", self.clock)
         actor_2 = Actor("bob", self.clock)
 
-        idle_1 = Idling(actor_1)
+        idle_1 = Idling()
         actor_1.allocate_task(idle_1, idle_1.idle, [])
-        idle_2 = Idling(actor_2)
+        idle_2 = Idling()
         actor_2.allocate_task(idle_2, idle_2.idle, [])
 
         actor_1.start()

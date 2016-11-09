@@ -1,103 +1,8 @@
-import inspect
-
 from Queue import Queue, Empty
 from threading import Event, RLock, Thread
 
-
-def default_cost(cost=0):
-    def workflow_decorator(func):
-        func.default_cost = cost
-        return func
-    return workflow_decorator
-
-
-class AllocatedTask(object):
-
-    def __init__(self, workflow, entry_point, args):
-        self.workflow = workflow
-        self.entry_point = entry_point
-        self.args = args
-
-        self.completion_information = None
-
-    def __repr__(self):
-        return "t_(%s, %s)" % (str(self.entry_point.func_name), str(self.args))
-
-    @property
-    def completed(self):
-        return self.completion_information is not None
-
-
-class CompletedTask(object):
-
-    def __init__(self, func, parent, start_tick):
-        self.parent = parent
-        self.sub_tasks = list()
-
-        self.func = func
-        self.start_tick = start_tick
-        self.finish_tick = -1
-
-    def append_sub_task(self, sub_task):
-        self.sub_tasks.append(sub_task)
-        pass
-
-    def __str__(self):
-        return "%s(%d->%d)" % (self.func.func_name, self.start_tick, self.finish_tick)
-
-    def __repr__(self):
-        return self.__str__()
-
-
-class Workflow(object):
-
-    def __init__(self, actor, logging=True):
-        self.logging = logging
-        self.actor = actor
-
-    def __getattribute__(self, item):
-
-        attribute = object.__getattribute__(self, item)
-
-        if inspect.ismethod(attribute):
-
-            def sync_wrap(*args, **kwargs):
-                self.actor.busy.acquire()
-                if self.logging:
-                    self.actor.log_task_initiation(attribute)
-
-                # TODO Pass function name and indicative cost to a cost calculation function.
-                if hasattr(attribute, 'default_cost'):
-                    self.actor.incur_delay(attribute.default_cost)
-
-                self.actor.wait_for_turn()
-
-                result = attribute.im_func(self, *args, **kwargs)
-
-                if self.logging:
-                    self.actor.log_task_completion()
-
-                self.actor.busy.release()
-                return result
-
-            sync_wrap.func_name = attribute.im_func.func_name
-
-            return sync_wrap
-        else:
-            return attribute
-
-
-class Idling(Workflow):
-    """
-    A workflow that allows an actor to waste a turn.
-    """
-
-    @default_cost(1)
-    def idle(self): pass
-
-    def idle_until(self, allocated_task):
-        while not allocated_task.completed:
-            self.idle()
+from .task import AllocatedTask, CompletedTask
+from .workflow import allocate_workflow_to, Idling
 
 
 class Actor(object):
@@ -125,13 +30,17 @@ class Actor(object):
 
         self.task_queue = Queue()
 
-        self.idling = Idling(self, logging=False)
-        self.idling.actor = self
+        self.idling = Idling()
+        allocate_workflow_to(self, self.idling, logging=False)
 
         self.next_turn = 0
 
     def allocate_task(self, workflow, entry_point, args=list()):
-        workflow.actor = self
+
+        entry_point_name = entry_point.func_name
+        allocate_workflow_to(self, workflow)
+        entry_point = workflow.__getattribute__(entry_point_name)
+
         allocated_task = AllocatedTask(workflow, entry_point, args)
         self.task_queue.put(allocated_task)
         return allocated_task
