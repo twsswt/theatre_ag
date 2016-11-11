@@ -5,9 +5,14 @@ from .task import AllocatedTask, CompletedTask
 from .workflow import allocate_workflow_to, Idling
 
 
+class OutOfTurnsException(Exception):
+    pass
+
+
 class Actor(object):
     """
-    Models the work behaviour of a self-directing entity.
+    Models the work behaviour of a self-directing entity.  Actors can be assigned tasks described by workflows which are
+    executed in synchronization with actor's clock.
     """
 
     def __init__(self, logical_name, clock):
@@ -69,17 +74,21 @@ class Actor(object):
 
     def perform(self):
         """
-        Repeatedly polls the actor's asynchronous work queue until the actor is shutdown.  On shutdown, all remaining
-        tasks are processed before termination.
+        Repeatedly polls the actor's asynchronous work queue until the actor is shutdown.  Tasks in the work queue are
+        executed synchronously until shutdown.  On shutdown, all remaining tasks in the queue are processed before
+        termination.  Task execution will halt immediately if the actor's clock runs up to it's maximum tick count.
         """
         while self.wait_for_directions or not self.task_queue.empty():
             try:
-                task = self.task_queue.get(block=False)
-                if task is not None:
-                    task.entry_point(*task.args)
-                    task.completion_information = self.last_completed_task
-            except Empty:
-                self.idling.idle()
+                try:
+                    task = self.task_queue.get(block=False)
+                    if task is not None:
+                        task.entry_point(*task.args)
+                        task.completion_information = self.last_completed_task
+                except Empty:
+                    self.idling.idle()
+            except OutOfTurnsException:
+                break
 
         # Ensure that clock can proceed for other listeners.
         self.clock.remove_tick_listener(self)
@@ -97,10 +106,16 @@ class Actor(object):
         self.next_turn += delay
 
     def wait_for_turn(self):
+        """
+        A method that blocks while the actor's clock time is less than the time of the actor's next turn.
+        """
         while self.clock.current_tick < self.next_turn:
-            self.waiting_for_tick.set()
-            self.tick_received.wait()
-            self.tick_received.clear()
+            if self.clock.will_tick_again:
+                self.waiting_for_tick.set()
+                self.tick_received.wait()
+                self.tick_received.clear()
+            else:
+                raise OutOfTurnsException()
 
     def notify_new_tick(self):
         self.tick_received.set()
@@ -130,16 +145,8 @@ class Team(object):
 
     def perform(self):
 
-        self.allocate_tasks()
-
         for actor in self.team_members:
             actor.start()
 
         for actor in self.team_members:
             actor.shutdown()
-
-    def allocate_tasks(self):
-        """
-        Implementing classes should over-ride this method to allocate tasks to team members.
-        """
-        pass

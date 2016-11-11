@@ -91,6 +91,11 @@ class Idling(object):
     is_workflow = True
 
     @default_cost(0)
+    def idle_for(self, duration):
+        for xxx in range (0, duration):
+            self.idle()
+
+    @default_cost(0)
     def idle_until(self, allocated_task):
         while not allocated_task.completed:
             self.idle()

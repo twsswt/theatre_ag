@@ -71,5 +71,22 @@ class ActorTestCase(TestCase):
         self.assertEquals(actor_1.last_completed_task.finish_tick, 1)
         self.assertEquals(actor_2.last_completed_task.finish_tick, 1)
 
+    def test_insufficient_time_shutdown_cleanly(self):
+        """
+        Demonstrate that actors can shutdown cleanly if their allocated tasks proceed beyond the maximum clock time.
+        """
+        clock = SynchronizingClock(max_ticks=2)
+        actor = Actor("alice", clock)
+        idling = Idling()
+        actor.allocate_task(idling, idling.idle_for, [3])
+
+        actor.start()
+        clock.start()
+        actor.shutdown()
+
+        self.assertEquals(3, len(actor.completed_tasks[0].sub_tasks))
+        self.assertEquals(-1, actor.completed_tasks[0].finish_tick)
+
+
 
 

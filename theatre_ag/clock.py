@@ -17,6 +17,10 @@ class SynchronizingClock(object):
     def current_tick(self):
         return self._ticks
 
+    @property
+    def will_tick_again(self):
+        return self.current_tick < self.max_ticks and self.issue_ticks
+
     def start(self):
         self._thread.start()
 
@@ -31,9 +35,12 @@ class SynchronizingClock(object):
         self.tick_listeners.remove(listener)
 
     def tick(self):
-        # Issue a tick once all listeners are waiting for them.
+        """
+        Issues a tick once all registered tick listeners are waiting for them.
+        """
         for tick_listener in self.tick_listeners:
             tick_listener.waiting_for_tick.wait()
+
         self._ticks += 1
 
         for tick_listener in self.tick_listeners:
