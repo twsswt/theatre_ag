@@ -1,5 +1,3 @@
-from threading import Thread
-
 from unittest import TestCase
 
 from theatre_ag import Actor, Idling, SynchronizingClock, default_cost
@@ -29,7 +27,7 @@ class ActorTestCase(TestCase):
 
         class ExampleWorkflow(object):
 
-            is_workflow=True
+            is_workflow =True
 
             def __init__(self, idling):
                 self.idling = idling

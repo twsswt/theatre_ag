@@ -31,7 +31,7 @@ def allocate_workflow_to(actor, workflow, logging=True):
         _workflow_classes.add(workflow_class)
 
     for name, member in inspect.getmembers(workflow):
-        if hasattr(member.__class__, 'is_workflow') and not _workflow_actors.has_key(member):
+        if hasattr(member.__class__, 'is_workflow') and member not in _workflow_actors:
             allocate_workflow_to(actor, member, logging)
 
 
@@ -44,13 +44,13 @@ def treat_as_workflow(workflow_class):
 
     reference_get_attr = workflow_class.__getattribute__
 
-    def __tracked_getattribute (self, item):
+    def __tracked_getattribute(self, item):
         attribute = reference_get_attr(self, item)
         if inspect.ismethod(attribute) and not attribute.func_name[0:2] == '__':
 
             def sync_wrap(*args, **kwargs):
 
-                if _workflow_actors.has_key(self):
+                if self in _workflow_actors:
 
                     actor, logging = _workflow_actors[self]
                     actor.busy.acquire()
@@ -92,7 +92,7 @@ class Idling(object):
 
     @default_cost(0)
     def idle_for(self, duration):
-        for xxx in range (0, duration):
+        for _ in range(0, duration):
             self.idle()
 
     @default_cost(0)
