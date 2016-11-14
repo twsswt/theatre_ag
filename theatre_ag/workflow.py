@@ -45,8 +45,13 @@ def treat_as_workflow(workflow_class):
     reference_get_attr = workflow_class.__getattribute__
 
     def __tracked_getattribute(self, item):
+
         attribute = reference_get_attr(self, item)
-        if inspect.ismethod(attribute) and not attribute.func_name[0:2] == '__':
+
+        if hasattr(attribute, 'func_name') and attribute.func_name[0:2] == '__':
+            return attribute
+
+        elif inspect.ismethod(attribute) or inspect.isfunction(attribute):
 
             def sync_wrap(*args, **kwargs):
 
@@ -63,7 +68,10 @@ def treat_as_workflow(workflow_class):
                         actor.incur_delay(attribute.default_cost)
                     actor.wait_for_turn()
 
-                    result = attribute.im_func(self, *args, **kwargs)
+                    if inspect.ismethod(attribute):
+                        result = attribute.im_func(self, *args, **kwargs)
+                    else:
+                        result = attribute(*args, **kwargs)
 
                     if logging:
                         actor.log_task_completion()
@@ -74,8 +82,13 @@ def treat_as_workflow(workflow_class):
                 else:
                     return attribute.im_func(self, *args, **kwargs)
 
-            sync_wrap.func_name = attribute.im_func.func_name
+            if inspect.ismethod(attribute):
+                sync_wrap.func_name = attribute.im_func.func_name
+            else:
+                sync_wrap.func_name = attribute.func_name
+
             return sync_wrap
+
         else:
             return attribute
 
