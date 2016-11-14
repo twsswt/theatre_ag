@@ -27,7 +27,7 @@ class ActorTestCase(TestCase):
 
         class ExampleWorkflow(object):
 
-            is_workflow =True
+            is_workflow = True
 
             def __init__(self, idling):
                 self.idling = idling
