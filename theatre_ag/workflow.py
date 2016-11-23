@@ -18,6 +18,11 @@ _workflow_classes = set()
 _workflow_actors = dict()
 
 
+def get_actor_for_workflow(workflow):
+    actor_logging_tuple = _workflow_actors.get(workflow, None)
+    return None if actor_logging_tuple is None else actor_logging_tuple[0]
+
+
 def allocate_workflow_to(actor, workflow, logging=True):
     """
     Allocates the workflow to the specified actor for timing synchronization purposes.  The members of the workflow are
