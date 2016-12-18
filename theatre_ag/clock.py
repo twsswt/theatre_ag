@@ -43,7 +43,10 @@ class SynchronizingClock(object):
 
         self._ticks += 1
 
-        for tick_listener in self.tick_listeners:
+        unmodifiable_copy_of_tick_listeners = list(self.tick_listeners)
+
+        for tick_listener in unmodifiable_copy_of_tick_listeners:
+
             tick_listener.notify_new_tick()
 
     def tick_toc(self):
