@@ -15,28 +15,22 @@ def default_cost(cost=0):
 _workflow_classes = set()
 
 
-_workflow_actors = dict()
-
-
-def get_actor_for_workflow(workflow):
-    actor_logging_tuple = _workflow_actors.get(workflow, None)
-    return None if actor_logging_tuple is None else actor_logging_tuple[0]
-
-
 def allocate_workflow_to(actor, workflow, logging=True):
     """
     Allocates the workflow to the specified actor for timing synchronization purposes.  The members of the workflow are
     recursively inspected.  Any member with the class attribute 'is_workflow' is also allocated to this actor if it has
     not previously been allocated to another actor.
     """
-    _workflow_actors[workflow] = (actor, logging)
+    workflow.actor = actor
+    workflow.logging = logging
+
     workflow_class = workflow.__class__
     if workflow_class not in _workflow_classes:
         treat_as_workflow(workflow_class)
         _workflow_classes.add(workflow_class)
 
     for name, member in inspect.getmembers(workflow):
-        if hasattr(member.__class__, 'is_workflow') and member not in _workflow_actors:
+        if hasattr(member.__class__, 'is_workflow') and not hasattr(member, 'actor'):
             allocate_workflow_to(actor, member, logging)
 
 
@@ -60,9 +54,11 @@ def treat_as_workflow(workflow_class):
 
             def sync_wrap(*args, **kwargs):
 
-                if self in _workflow_actors:
+                if hasattr(self, 'actor'):
 
-                    actor, logging = _workflow_actors[self]
+                    actor = self.actor
+                    logging = self.logging
+
                     actor.busy.acquire()
 
                     if logging:
@@ -71,12 +67,15 @@ def treat_as_workflow(workflow_class):
                     # TODO Pass function name and indicative cost to a cost calculation function.
                     if hasattr(attribute, 'default_cost'):
                         actor.incur_delay(attribute.default_cost)
+
+                    #print "Waiting for turn"
                     actor.wait_for_turn()
 
                     if inspect.ismethod(attribute):
                         result = attribute.im_func(self, *args, **kwargs)
                     else:
                         result = attribute(*args, **kwargs)
+
 
                     if logging:
                         actor.log_task_completion()
