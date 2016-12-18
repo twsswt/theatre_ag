@@ -85,6 +85,7 @@ class Actor(object):
                     if task is not None:
                         task.entry_point(*task.args)
                         task.completion_information = self.last_completed_task
+
                 except Empty:
                     self.idling.idle()
             except OutOfTurnsException:
@@ -98,7 +99,13 @@ class Actor(object):
         self.thread.start()
 
     def shutdown(self):
+        self.initiate_shutdown()
+        self.wait_for_shutdown()
+
+    def initiate_shutdown(self):
         self.wait_for_directions = False
+
+    def wait_for_shutdown(self):
         self.thread.join()
 
     def incur_delay(self, delay):
@@ -109,6 +116,7 @@ class Actor(object):
         """
         A method that blocks while the actor's clock time is less than the time of the actor's next turn.
         """
+
         while self.clock.current_tick < self.next_turn:
             if self.clock.will_tick_again:
                 self.waiting_for_tick.set()
