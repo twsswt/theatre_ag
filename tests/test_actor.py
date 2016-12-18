@@ -52,22 +52,28 @@ class ActorTestCase(TestCase):
 
     def test_multiple_actors(self):
 
-        actor_1 = Actor("alice", self.clock)
-        actor_2 = Actor("bob", self.clock)
+        actors = list()
 
-        idle_1 = Idling()
-        actor_1.allocate_task(idle_1, idle_1.idle, [])
-        idle_2 = Idling()
-        actor_2.allocate_task(idle_2, idle_2.idle, [])
+        def add_actor_to_test():
+            actor = Actor(len(actors), self.clock)
+            idle_task = Idling()
+            actor.allocate_task(idle_task, idle_task.idle)
+            actor.initiate_shutdown()
+            actors.append(actor)
 
-        actor_1.start()
-        actor_2.start()
+        for i in range(0, 10):
+            add_actor_to_test()
+
+        for actor in actors:
+            actor.start()
+
         self.clock.start()
-        actor_1.shutdown()
-        actor_2.shutdown()
 
-        self.assertEquals(actor_1.last_completed_task.finish_tick, 1)
-        self.assertEquals(actor_2.last_completed_task.finish_tick, 1)
+        for actor in actors:
+            actor.wait_for_shutdown()
+
+        for actor in actors:
+            self.assertEquals('idle(0->1)', str(actor.last_completed_task))
 
     def test_insufficient_time_shutdown_cleanly(self):
         """
