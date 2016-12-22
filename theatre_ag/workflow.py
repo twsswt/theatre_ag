@@ -68,14 +68,12 @@ def treat_as_workflow(workflow_class):
                     if hasattr(attribute, 'default_cost'):
                         actor.incur_delay(attribute.default_cost)
 
-                    #print "Waiting for turn"
                     actor.wait_for_turn()
 
                     if inspect.ismethod(attribute):
                         result = attribute.im_func(self, *args, **kwargs)
                     else:
                         result = attribute(*args, **kwargs)
-
 
                     if logging:
                         actor.log_task_completion()

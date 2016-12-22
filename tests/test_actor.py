@@ -55,11 +55,11 @@ class ActorTestCase(TestCase):
         actors = list()
 
         def add_actor_to_test():
-            actor = Actor(len(actors), self.clock)
+            _actor = Actor(len(actors), self.clock)
             idle_task = Idling()
-            actor.allocate_task(idle_task, idle_task.idle)
-            actor.initiate_shutdown()
-            actors.append(actor)
+            _actor.allocate_task(idle_task, idle_task.idle)
+            _actor.initiate_shutdown()
+            actors.append(_actor)
 
         for i in range(0, 10):
             add_actor_to_test()
