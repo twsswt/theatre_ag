@@ -28,7 +28,7 @@ class CompletedTask(object):
 
         self.func = func
         self.start_tick = start_tick
-        self.finish_tick = -1
+        self.finish_tick = None
 
     def append_sub_task(self, sub_task):
         self.sub_tasks.append(sub_task)

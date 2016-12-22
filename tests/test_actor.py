@@ -89,7 +89,7 @@ class ActorTestCase(TestCase):
         actor.shutdown()
 
         self.assertEquals(3, len(actor.completed_tasks[0].sub_tasks))
-        self.assertEquals(-1, actor.completed_tasks[0].finish_tick)
+        self.assertEquals(None, actor.completed_tasks[0].finish_tick)
 
 
 
