@@ -126,8 +126,8 @@ class Actor(object):
                 raise OutOfTurnsException()
 
     def notify_new_tick(self):
-        self.tick_received.set()
         self.waiting_for_tick.clear()
+        self.tick_received.set()
 
     def __str__(self):
         return "a_%s" % self.logical_name
