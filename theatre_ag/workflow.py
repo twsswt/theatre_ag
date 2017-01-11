@@ -62,7 +62,7 @@ def treat_as_workflow(workflow_class):
                     actor.busy.acquire()
 
                     if logging:
-                        actor.log_task_initiation(attribute)
+                        actor.log_task_initiation(self, attribute, args)
 
                     # TODO Pass function name and indicative cost to a cost calculation function.
                     if hasattr(attribute, 'default_cost'):

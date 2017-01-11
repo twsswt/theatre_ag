@@ -1,7 +1,7 @@
 from Queue import Queue, Empty
 from threading import Event, RLock, Thread
 
-from .task import AllocatedTask, CompletedTask
+from .task import Task
 from .workflow import allocate_workflow_to, Idling
 
 
@@ -30,7 +30,7 @@ class Actor(object):
 
         self.clock.add_tick_listener(self)
 
-        self.completed_tasks = []
+        self.task_history = list()
         self.current_task = None
 
         self.task_queue = Queue()
@@ -46,31 +46,28 @@ class Actor(object):
         allocate_workflow_to(self, workflow)
         entry_point = workflow.__getattribute__(entry_point_name)
 
-        allocated_task = AllocatedTask(workflow, entry_point, args)
+        allocated_task = Task(workflow, entry_point, args)
         self.task_queue.put(allocated_task)
         return allocated_task
 
-    def log_task_initiation(self, attribute):
-        new_task = CompletedTask(attribute, self.current_task, self.clock.current_tick)
+    def log_task_initiation(self, workflow, entry_point, args):
 
-        if self.current_task is None:
-            self.completed_tasks.append(new_task)
-        else:
-            self.current_task.append_sub_task(new_task)
+        if self.current_task.initiated:
+            self.current_task = self.current_task.append_sub_task(workflow, entry_point, args)
 
-        self.current_task = new_task
+        self.current_task.initiate(self.clock.current_tick)
 
     def log_task_completion(self):
-        self.current_task.finish_tick = self.clock.current_tick
+        self.current_task.complete(self.clock.current_tick)
         self.current_task = self.current_task.parent
 
     @property
     def last_completed_task(self):
-        index = len(self.completed_tasks)-1
+        index = len(self.task_history) - 1
         if index < 0:
             return None
         else:
-            return self.completed_tasks[index]
+            return self.task_history[index]
 
     def perform(self):
         """
@@ -83,8 +80,9 @@ class Actor(object):
                 try:
                     task = self.task_queue.get(block=False)
                     if task is not None:
+                        self.task_history.append(task)
+                        self.current_task = task
                         task.entry_point(*task.args)
-                        task.completion_information = self.last_completed_task
 
                 except Empty:
                     self.idling.idle()

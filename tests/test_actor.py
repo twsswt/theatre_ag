@@ -73,7 +73,7 @@ class ActorTestCase(TestCase):
             actor.wait_for_shutdown()
 
         for actor in actors:
-            self.assertEquals('idle(0->1)', str(actor.last_completed_task))
+            self.assertEquals('idle()[0->1]', str(actor.last_completed_task))
 
     def test_insufficient_time_shutdown_cleanly(self):
         """
@@ -88,8 +88,8 @@ class ActorTestCase(TestCase):
         clock.start()
         actor.shutdown()
 
-        self.assertEquals(3, len(actor.completed_tasks[0].sub_tasks))
-        self.assertEquals(None, actor.completed_tasks[0].finish_tick)
+        self.assertEquals(3, len(actor.task_history[0].sub_tasks))
+        self.assertEquals(None, actor.task_history[0].finish_tick)
 
 
 
