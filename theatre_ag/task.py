@@ -4,6 +4,7 @@
 
 
 class Task(object):
+    ""
 
     def __init__(self, workflow, entry_point, args=(), parent=None):
         self.parent = parent

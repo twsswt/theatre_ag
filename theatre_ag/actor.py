@@ -30,7 +30,7 @@ class Actor(object):
 
         self.clock.add_tick_listener(self)
 
-        self.task_history = list()
+        self._task_history = list()
         self.current_task = None
 
         self.task_queue = Queue()
@@ -62,12 +62,15 @@ class Actor(object):
         self.current_task = self.current_task.parent
 
     @property
+    def task_history(self):
+        return filter(lambda task: task.workflow.logging is not False, self._task_history)
+
+    @property
     def last_completed_task(self):
-        index = len(self.task_history) - 1
-        if index < 0:
+        try:
+            return self.task_history[-1]
+        except IndexError:
             return None
-        else:
-            return self.task_history[index]
 
     def perform(self):
         """
@@ -79,13 +82,14 @@ class Actor(object):
             try:
                 try:
                     task = self.task_queue.get(block=False)
-                    if task is not None:
-                        self.task_history.append(task)
-                        self.current_task = task
-                        task.entry_point(*task.args)
-
                 except Empty:
-                    self.idling.idle()
+                    task = Task(self.idling, self.idling.idle)
+
+                if task is not None:
+                    self._task_history.append(task)
+                    self.current_task = task
+                    task.entry_point(*task.args)
+
             except OutOfTurnsException:
                 break
 

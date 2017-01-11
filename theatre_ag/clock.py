@@ -33,6 +33,9 @@ class SynchronizingClock(object):
         self.issue_ticks = False
         self._thread.join()
 
+    def wait_for_last_tick(self):
+        self._thread.join()
+
     def add_tick_listener(self, listener):
         self._tick_listeners_lock.acquire()
         self._tick_listeners.append(listener)

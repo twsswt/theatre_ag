@@ -9,21 +9,48 @@ class ActorTestCase(TestCase):
 
         self.clock = SynchronizingClock(max_ticks=4)
 
-    def test_idle(self):
+    def test_explicit_idle(self):
 
-        actor_1 = Actor("alice", self.clock)
+        actor = Actor(0, self.clock)
 
         idling = Idling()
-        actor_1.allocate_task(idling, idling.idle, [])
-        actor_1.start()
-        self.clock.start()
-        actor_1.shutdown()
+        actor.allocate_task(idling, idling.idle, [])
 
-        self.assertEquals(1, actor_1.last_completed_task.finish_tick)
+        actor.initiate_shutdown()
+
+        actor.start()
+        self.clock.start()
+        actor.wait_for_shutdown()
+
+        self.assertEquals(1, actor.last_completed_task.finish_tick)
+
+    def test_idling_when_nothing_to_do(self):
+
+        actor = Actor(0, self.clock)
+        actor.start()
+
+        self.clock.start()
+        self.clock.wait_for_last_tick()
+
+        self.assertEquals(0, len(actor.task_history))
+
+    def test_idling_when_nothing_to_do_after_completed_task(self):
+
+        actor = Actor(0, self.clock)
+
+        idling = Idling()
+        actor.allocate_task(idling, idling.idle, [])
+
+        actor.start()
+        self.clock.start()
+
+        self.clock.wait_for_last_tick()
+
+        self.assertEquals(1, actor.last_completed_task.finish_tick)
 
     def test_nested_task(self):
 
-        actor_1 = Actor("alice", self.clock)
+        actor = Actor(0, self.clock)
 
         class ExampleWorkflow(object):
 
@@ -42,30 +69,28 @@ class ActorTestCase(TestCase):
 
         workflow = ExampleWorkflow(Idling())
 
-        actor_1.allocate_task(workflow, workflow.task_a, [])
+        actor.allocate_task(workflow, workflow.task_a, [])
 
-        actor_1.start()
+        actor.start()
         self.clock.start()
-        actor_1.shutdown()
+        actor.shutdown()
 
-        self.assertEquals(actor_1.last_completed_task.finish_tick, 3)
+        self.assertEquals(actor.last_completed_task.finish_tick, 3)
 
     def test_multiple_actors(self):
 
         actors = list()
 
-        def add_actor_to_test():
-            _actor = Actor(len(actors), self.clock)
+        def add_actor_to_test(logical_name):
+            _actor = Actor(logical_name, self.clock)
             idle_task = Idling()
             _actor.allocate_task(idle_task, idle_task.idle)
             _actor.initiate_shutdown()
             actors.append(_actor)
+            _actor.start()
 
-        for i in range(0, 10):
-            add_actor_to_test()
-
-        for actor in actors:
-            actor.start()
+        for name in range(0, 10):
+            add_actor_to_test(name)
 
         self.clock.start()
 
@@ -80,7 +105,7 @@ class ActorTestCase(TestCase):
         Demonstrate that actors can shutdown cleanly if their allocated tasks proceed beyond the maximum clock time.
         """
         clock = SynchronizingClock(max_ticks=2)
-        actor = Actor("alice", clock)
+        actor = Actor(0, clock)
         idling = Idling()
         actor.allocate_task(idling, idling.idle_for, [3])
 
@@ -88,8 +113,8 @@ class ActorTestCase(TestCase):
         clock.start()
         actor.shutdown()
 
-        self.assertEquals(3, len(actor.task_history[0].sub_tasks))
-        self.assertEquals(None, actor.task_history[0].finish_tick)
+        self.assertEquals(3, len(actor._task_history[0].sub_tasks))
+        self.assertEquals(None, actor._task_history[0].finish_tick)
 
 
 
