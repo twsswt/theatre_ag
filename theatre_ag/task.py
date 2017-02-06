@@ -41,6 +41,6 @@ class Task(object):
         start_tick = '?' if self.start_tick is None else str(self.start_tick)
         finish_tick = '?' if self.finish_tick is None else str(self.finish_tick)
 
-        args = ','.join(self.args)
+        args = ','.join(map(lambda e: str(e), self.args))
 
         return '%s(%s)[%s->%s]' % (self.entry_point.func_name, args, start_tick, finish_tick)

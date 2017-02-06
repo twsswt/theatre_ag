@@ -153,10 +153,6 @@ class Team(object):
         self.team_members.append(actor)
         return actor
 
-    def perform(self):
-
+    def start(self):
         for actor in self.team_members:
             actor.start()
-
-        for actor in self.team_members:
-            actor.shutdown()
