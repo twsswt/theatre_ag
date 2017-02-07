@@ -104,6 +104,11 @@ class Idling(object):
             self.idle()
 
     @default_cost(0)
+    def wait_for_tasks(self, allocated_tasks):
+        for task in allocated_tasks:
+            self.idle_until(task)
+
+    @default_cost(0)
     def idle_until(self, allocated_task):
         while not allocated_task.completed:
             self.idle()
