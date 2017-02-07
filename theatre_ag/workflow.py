@@ -12,9 +12,6 @@ def default_cost(cost=0):
     return workflow_decorator
 
 
-_workflow_classes = set()
-
-
 def allocate_workflow_to(actor, workflow, logging=True):
     """
     Allocates the workflow to the specified actor for timing synchronization purposes.  The members of the workflow are
@@ -25,9 +22,9 @@ def allocate_workflow_to(actor, workflow, logging=True):
     workflow.logging = logging
 
     workflow_class = workflow.__class__
-    if workflow_class not in _workflow_classes:
+
+    if not workflow_class.__getattribute__.__name__ == '__tracked_getattribute':
         treat_as_workflow(workflow_class)
-        _workflow_classes.add(workflow_class)
 
     for name, member in inspect.getmembers(workflow):
         if hasattr(member.__class__, 'is_workflow') and not hasattr(member, 'actor'):
@@ -59,7 +56,6 @@ def treat_as_workflow(workflow_class):
                     actor = self.actor
 
                     actor.busy.acquire()
-
                     actor.log_task_initiation(self, attribute, args)
 
                     # TODO Pass function name and indicative cost to a cost calculation function.
