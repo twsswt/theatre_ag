@@ -4,7 +4,9 @@
 
 
 class Task(object):
-    ""
+    """
+    Captures status information about a task to be performed by an actor.
+    """
 
     def __init__(self, workflow, entry_point, args=(), parent=None):
         self.parent = parent
