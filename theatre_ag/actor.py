@@ -4,6 +4,7 @@ from threading import Event, RLock, Thread
 from .task import Task
 from .workflow import allocate_workflow_to, Idling
 
+import inspect
 
 class OutOfTurnsException(Exception):
     pass
@@ -71,6 +72,25 @@ class Actor(object):
             return self.task_history[-1]
         except IndexError:
             return None
+
+    def task_count(self, task_func=None):
+
+        def recursive_task_count(task_history):
+
+            result = 0
+
+            for completed_task in task_history:
+                result += recursive_task_count(completed_task.sub_tasks)
+
+                func = completed_task.entry_point.im_func if inspect.ismethod(completed_task.entry_point) \
+                    else completed_task.entry_point
+
+                if task_func is None or func.func_name == task_func.im_func.func_name:
+                    result += 1
+
+            return result
+
+        return recursive_task_count(self.task_history)
 
     def perform(self):
         """
@@ -156,3 +176,21 @@ class Team(object):
     def start(self):
         for actor in self.team_members:
             actor.start()
+
+    @property
+    def last_tick(self):
+
+        def finish_ticks(developer):
+            if developer.last_completed_task is None:
+                return 0
+            elif developer.last_completed_task.finish_tick is None:
+                return self.clock.current_tick
+            else:
+                return developer.last_completed_task.finish_tick
+
+        last_tick = reduce(max, map(finish_ticks, self.team_members))
+
+        return last_tick
+
+    def task_count(self, task):
+        return sum(map(lambda actor: actor.task_count(task), self.team_members))
