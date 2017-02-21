@@ -173,15 +173,15 @@ class Cast(object):
     def __init__(self, clock):
         self.clock = clock
 
-        self.team_members = list()
+        self.members = list()
 
     def add_member(self, logical_name):
         actor = Actor(logical_name, self.clock)
-        self.team_members.append(actor)
+        self.members.append(actor)
         return actor
 
     def start(self):
-        for actor in self.team_members:
+        for actor in self.members:
             actor.start()
 
     @property
@@ -195,9 +195,9 @@ class Cast(object):
             else:
                 return developer.last_completed_task.finish_tick
 
-        last_tick = reduce(max, map(finish_ticks, self.team_members))
+        last_tick = reduce(max, map(finish_ticks, self.members))
 
         return last_tick
 
     def task_count(self, task):
-        return sum(map(lambda actor: actor.task_count(task), self.team_members))
+        return sum(map(lambda actor: actor.task_count(task), self.members))
