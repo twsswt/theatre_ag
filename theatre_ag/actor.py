@@ -6,8 +6,15 @@ from .workflow import allocate_workflow_to, Idling
 
 import inspect
 
+
 class OutOfTurnsException(Exception):
+
+    def __init__(self, actor):
+        self.actor = actor
     pass
+
+    def __str__(self):
+        return self.actor.logical_name, "out of turns after", self.actor.clock.current_tick, "ticks."
 
 
 class Actor(object):
@@ -145,7 +152,7 @@ class Actor(object):
                 self.tick_received.wait()
                 self.tick_received.clear()
             else:
-                raise OutOfTurnsException()
+                raise OutOfTurnsException(self)
 
     def notify_new_tick(self):
         self.waiting_for_tick.clear()
