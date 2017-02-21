@@ -2,7 +2,7 @@ import unittest
 
 from mock import Mock
 
-from theatre_ag import SynchronizingClock, Team
+from theatre_ag import SynchronizingClock, Cast
 
 
 class TeamTestCase(unittest.TestCase):
@@ -11,7 +11,7 @@ class TeamTestCase(unittest.TestCase):
 
         self.clock = Mock(spec=SynchronizingClock)
 
-        self.tdd_development_team = Team(self.clock)
+        self.tdd_development_team = Cast(self.clock)
 
     def test_add_team_member(self):
         self.tdd_development_team.add_member('alice')

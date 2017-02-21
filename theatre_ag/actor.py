@@ -165,7 +165,7 @@ class Actor(object):
         return self.__str__()
 
 
-class Team(object):
+class Cast(object):
     """
     A collection of actors who synchronize their actions on a single clock.
     """
