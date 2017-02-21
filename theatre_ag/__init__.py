@@ -1,3 +1,4 @@
-from .actor import Actor, Cast
+from .actor import Actor
+from .cast import Cast
 from .workflow import Idling, default_cost
 from .clock import SynchronizingClock
