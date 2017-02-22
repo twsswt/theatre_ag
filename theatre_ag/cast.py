@@ -15,6 +15,9 @@ class Cast(object):
         self.members.append(actor)
         return actor
 
+    def improvise(self, directions):
+        directions.apply(self.members)
+
     def start(self):
         for actor in self.members:
             actor.start()
