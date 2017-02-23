@@ -80,6 +80,15 @@ class Actor(object):
         except IndexError:
             return None
 
+    @property
+    def last_tick(self):
+        if self.last_completed_task is None:
+            return 0
+        elif not self.last_completed_task.completed:
+            return self.clock.current_tick
+        else:
+            return self.last_completed_task.finish_tick
+
     def task_count(self, task_func=None):
 
         def recursive_task_count(task_history):
@@ -163,4 +172,3 @@ class Actor(object):
 
     def __repr__(self):
         return self.__str__()
-
