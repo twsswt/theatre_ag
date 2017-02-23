@@ -22,7 +22,7 @@ class ActorTestCase(TestCase):
         self.clock.start()
         actor.wait_for_shutdown()
 
-        self.assertEquals(1, actor.last_completed_task.finish_tick)
+        self.assertEquals(1, actor.last_task.finish_tick)
 
     def test_idling_when_nothing_to_do(self):
 
@@ -46,7 +46,7 @@ class ActorTestCase(TestCase):
 
         self.clock.wait_for_last_tick()
 
-        self.assertEquals(1, actor.last_completed_task.finish_tick)
+        self.assertEquals(1, actor.last_task.finish_tick)
 
     def test_nested_task(self):
 
@@ -75,7 +75,7 @@ class ActorTestCase(TestCase):
         self.clock.start()
         actor.shutdown()
 
-        self.assertEquals(actor.last_completed_task.finish_tick, 3)
+        self.assertEquals(actor.last_task.finish_tick, 3)
 
     def test_multiple_actors(self):
 
@@ -98,7 +98,7 @@ class ActorTestCase(TestCase):
             actor.wait_for_shutdown()
 
         for actor in actors:
-            self.assertEquals('idle()[0->1]', str(actor.last_completed_task))
+            self.assertEquals('idle()[0->1]', str(actor.last_task))
 
     def test_insufficient_time_shutdown_cleanly(self):
         """
