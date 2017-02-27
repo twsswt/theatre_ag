@@ -84,10 +84,8 @@ class Actor(object):
     def last_tick(self):
         if self.last_task is None:
             return 0
-        elif not self.last_task.completed:
-            return self.clock.current_tick
         else:
-            return self.last_task.finish_tick
+            return self.last_task.last_non_idling_tick
 
     def task_count(self, task_func=None):
 
