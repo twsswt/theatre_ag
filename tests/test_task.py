@@ -68,7 +68,7 @@ class TaskTestCase(unittest.TestCase):
         sub_task.complete(3)
         self.assertEquals(1, self.task.last_non_idling_tick)
 
-    def test_last_non_idling_tick_f(self):
+    def test_last_non_idling_tick_g(self):
         """
         The main task has been completed.
         One idling sub task has completed.
@@ -80,7 +80,7 @@ class TaskTestCase(unittest.TestCase):
         self.task.complete(4)
         self.assertEquals(4, self.task.last_non_idling_tick)
 
-    def test_last_non_idling_tick_g(self):
+    def test_last_non_idling_tick_h(self):
         """
         The main task has been initiated.
         One idling sub task has completed.
@@ -95,7 +95,7 @@ class TaskTestCase(unittest.TestCase):
         sub_task.initiate(4)
         self.assertEquals(4, self.task.last_non_idling_tick)
 
-    def test_last_non_idling_tick_h(self):
+    def test_last_non_idling_tick_i(self):
         """
         The main task has been initiated.
         One sub task has been completed.
@@ -112,7 +112,7 @@ class TaskTestCase(unittest.TestCase):
 
         self.assertEquals(3, self.task.last_non_idling_tick)
 
-    def test_last_non_idling_tick_i(self):
+    def test_last_non_idling_tick_j(self):
         """
         The main task has been initiated.
         One sub task has been completed.
