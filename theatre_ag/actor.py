@@ -1,10 +1,11 @@
+import inspect
+import sys
+
 from Queue import Queue, Empty
 from threading import Event, RLock, Thread
 
 from .task import Task
 from .workflow import allocate_workflow_to, Idling
-
-import inspect
 
 
 class OutOfTurnsException(Exception):
@@ -125,6 +126,10 @@ class Actor(object):
                     task.entry_point(*task.args)
 
             except OutOfTurnsException:
+                break
+            except Exception as e:
+                print >> sys.stderr, "Warning, actor [%s] encountered exception [%s], shutting down." % \
+                                     (self.logical_name, str(e.message))
                 break
 
         # Ensure that clock can proceed for other listeners.

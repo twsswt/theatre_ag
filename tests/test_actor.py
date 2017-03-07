@@ -100,6 +100,24 @@ class ActorTestCase(TestCase):
         for actor in actors:
             self.assertEquals('idle()[0->1]', str(actor.last_task))
 
+    def test_encounter_exception_shutdown_cleanly(self):
+
+        class ExampleWorkflow(object):
+            is_workflow = True
+
+            @default_cost(1)
+            def task_a(self):
+                raise Exception("Example exception.")
+
+        example_task = ExampleWorkflow()
+        actor = Actor(0, self.clock)
+        actor.allocate_task(example_task, example_task.task_a)
+        actor.start()
+        self.clock.start()
+        self.clock.wait_for_last_tick()
+
+        self.assertEquals('task_a()[0->?]', str(actor.current_task))
+
     def test_insufficient_time_shutdown_cleanly(self):
         """
         Demonstrate that actors can shutdown cleanly if their allocated tasks proceed beyond the maximum clock time.
