@@ -116,7 +116,7 @@ class ActorTestCase(TestCase):
         self.clock.start()
         self.clock.wait_for_last_tick()
 
-        self.assertEquals('task_a()[0->?]', str(actor.current_task))
+        self.assertEquals('task_a()[0->1]', str(actor.last_task))
 
     def test_insufficient_time_shutdown_cleanly(self):
         """

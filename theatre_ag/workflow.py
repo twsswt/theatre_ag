@@ -64,14 +64,15 @@ def treat_as_workflow(workflow_class):
 
                     actor.wait_for_turn()
 
-                    if inspect.ismethod(attribute):
-                        result = attribute.im_func(self, *args, **kwargs)
-                    else:
-                        result = attribute(*args, **kwargs)
+                    try:
+                        if inspect.ismethod(attribute):
+                            result = attribute.im_func(self, *args, **kwargs)
+                        else:
+                            result = attribute(*args, **kwargs)
+                    finally:
+                        actor.log_task_completion()
+                        actor.busy.release()
 
-                    actor.log_task_completion()
-
-                    actor.busy.release()
                     return result
 
                 else:

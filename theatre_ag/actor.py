@@ -114,6 +114,7 @@ class Actor(object):
         termination.  Task execution will halt immediately if the actor's clock runs up to it's maximum tick count.
         """
         while self.wait_for_directions or not self.task_queue.empty():
+            task = None
             try:
                 try:
                     task = self.task_queue.get(block=False)
@@ -128,9 +129,9 @@ class Actor(object):
             except OutOfTurnsException:
                 break
             except Exception as e:
-                print >> sys.stderr, "Warning, actor [%s] encountered exception [%s], shutting down." % \
-                                     (self.logical_name, str(e.message))
-                break
+                print >> sys.stderr, "Warning, actor [%s] encountered exception [%s], in workflow [%s]." % \
+                                     (self.logical_name, str(e.message), str(task))
+                pass
 
         # Ensure that clock can proceed for other listeners.
         self.clock.remove_tick_listener(self)
