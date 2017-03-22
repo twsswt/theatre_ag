@@ -1,8 +1,7 @@
 
 # Theatre_Ag: The Software Agent Theatre
 
-A framework for multi-agent simulations, with a particular focus on modelling socio-technical systems, implemented in
-Python.
+A Python framework for multi-agent simulations, with a particular focus on modelling socio-technical systems.
 
 # Contributors
 
