@@ -42,22 +42,10 @@ class Actor(object):
         self._task_history = list()
         self.current_task = None
 
-        self.task_queue = Queue()
-
         self.idling = Idling()
         allocate_workflow_to(self, self.idling, logging=False)
 
         self.next_turn = 0
-
-    def allocate_task(self, workflow, entry_point, args=list()):
-
-        entry_point_name = entry_point.func_name
-        allocate_workflow_to(self, workflow)
-        entry_point = workflow.__getattribute__(entry_point_name)
-
-        allocated_task = Task(workflow, entry_point, args)
-        self.task_queue.put(allocated_task)
-        return allocated_task
 
     def log_task_initiation(self, workflow, entry_point, args):
 
@@ -107,17 +95,36 @@ class Actor(object):
 
         return recursive_task_count(self.task_history)
 
+    def get_next_task(self):
+        """
+        Implementing classes or mix ins should override this method.  By default, this method will cause an Actor to
+        idle.
+        :raises Empty: if no next task is available.
+        """
+        raise Empty()
+
+    def tasks_waiting(self):
+        """
+        Implementing classes or mix ins should override this method.  By default, this method will return False.
+        :return False:
+        """
+        return False
+
     def perform(self):
         """
         Repeatedly polls the actor's asynchronous work queue until the actor is shutdown.  Tasks in the work queue are
         executed synchronously until shutdown.  On shutdown, all remaining tasks in the queue are processed before
         termination.  Task execution will halt immediately if the actor's clock runs up to it's maximum tick count.
         """
-        while self.wait_for_directions or not self.task_queue.empty():
+        while self.wait_for_directions or self.tasks_waiting():
             task = None
             try:
                 try:
-                    task = self.task_queue.get(block=False)
+                    task = self.get_next_task()
+                    entry_point_name = task.entry_point.func_name
+                    allocate_workflow_to(self, task.workflow)
+                    task.entry_point = task.workflow.__getattribute__(entry_point_name)
+
                 except Empty:
                     task = Task(self.idling, self.idling.idle)
 
@@ -176,3 +183,25 @@ class Actor(object):
 
     def __repr__(self):
         return self.__str__()
+
+
+class TaskQueueActor(Actor):
+    """
+    A simple actor class that receives executable tasks into a priority queue.
+    """
+
+    def __init__(self, logical_name,  clock):
+        super(TaskQueueActor, self).__init__(logical_name, clock)
+        self.task_queue = Queue()
+
+    def get_next_task(self):
+        return self.task_queue.get(block=False)
+
+    def tasks_waiting(self):
+        return not self.task_queue.empty()
+
+    def allocate_task(self, workflow, entry_point, args=list()):
+
+        allocated_task = Task(workflow, entry_point, args)
+        self.task_queue.put(allocated_task)
+        return allocated_task

@@ -2,7 +2,7 @@ import unittest
 
 from mock import Mock
 
-from theatre_ag import SynchronizingClock, Cast
+from theatre_ag import SynchronizingClock, Cast, TaskQueueActor
 
 
 class TeamTestCase(unittest.TestCase):
@@ -11,10 +11,10 @@ class TeamTestCase(unittest.TestCase):
 
         self.clock = Mock(spec=SynchronizingClock)
 
-        self.tdd_development_team = Cast(self.clock)
+        self.tdd_development_team = Cast()
 
     def test_add_member(self):
-        self.tdd_development_team.add_member('alice')
+        self.tdd_development_team.add_member(TaskQueueActor('alice', self.clock))
 
         self.assertEqual(1, len(self.tdd_development_team.members))
 

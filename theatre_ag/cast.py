@@ -6,15 +6,11 @@ class Cast(object):
     A collection of actors who synchronize their actions on a single clock.
     """
 
-    def __init__(self, clock):
-        self.clock = clock
-
+    def __init__(self):
         self.members = list()
 
-    def add_member(self, logical_name):
-        actor = Actor(logical_name, self.clock)
+    def add_member(self, actor):
         self.members.append(actor)
-        return actor
 
     def improvise(self, directions):
         directions.apply(self.members)
