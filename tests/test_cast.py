@@ -24,7 +24,7 @@ class TeamTestCase(unittest.TestCase):
             _actor = TaskQueueActor(name, self.clock)
             self.cast.add_member(_actor)
             idle_task = Idling()
-            _actor.allocate_task(idle_task, idle_task.idle)
+            _actor.allocate_task(idle_task.idle, idle_task)
 
         self.cast.initiate_shutdown()
         self.cast.start()

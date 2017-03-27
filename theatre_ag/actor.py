@@ -121,12 +121,13 @@ class Actor(object):
             try:
                 try:
                     task = self.get_next_task()
+
                     entry_point_name = task.entry_point.func_name
                     allocate_workflow_to(self, task.workflow)
                     task.entry_point = task.workflow.__getattribute__(entry_point_name)
 
                 except Empty:
-                    task = Task(self.idling, self.idling.idle)
+                    task = Task(self.idling.idle, self.idling)
 
                 if task is not None:
                     self._task_history.append(task)
@@ -200,8 +201,8 @@ class TaskQueueActor(Actor):
     def tasks_waiting(self):
         return not self.task_queue.empty()
 
-    def allocate_task(self, workflow, entry_point, args=list()):
+    def allocate_task(self, entry_point=None, workflow=None, args=list()):
 
-        allocated_task = Task(workflow, entry_point, args)
+        allocated_task = Task(entry_point, workflow, args)
         self.task_queue.put(allocated_task)
         return allocated_task
