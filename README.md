@@ -125,7 +125,7 @@ an entry point, which should be a instance method reference on the same workflow
     hands = Hands()
     wash = Wash(hands)
     actor.allocate_task(hands, wash.wash)
-    
+
 However, if you are dealing with an episode involving a large number of actors, it may be more convenient to specify
 directions to a cast for the episode:
 
