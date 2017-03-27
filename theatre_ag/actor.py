@@ -47,10 +47,10 @@ class Actor(object):
 
         self.next_turn = 0
 
-    def log_task_initiation(self, workflow, entry_point, args):
+    def log_task_initiation(self, entry_point, workflow, args):
 
         if self.current_task.initiated:
-            self.current_task = self.current_task.append_sub_task(workflow, entry_point, args)
+            self.current_task = self.current_task.append_sub_task(entry_point, workflow, args)
 
         self.current_task.initiate(self.clock.current_tick)
 
@@ -83,6 +83,7 @@ class Actor(object):
             result = 0
 
             for completed_task in task_history:
+
                 result += recursive_task_count(completed_task.sub_tasks)
 
                 func = completed_task.entry_point.im_func if inspect.ismethod(completed_task.entry_point) \

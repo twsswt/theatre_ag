@@ -33,8 +33,8 @@ class Task(object):
     def initiate(self, start_tick):
         self.start_tick = start_tick
 
-    def append_sub_task(self, workflow, entry_point, args=()):
-        sub_task = Task(workflow, entry_point, args, parent=self)
+    def append_sub_task(self, entry_point, workflow, args=()):
+        sub_task = Task(entry_point, workflow, args, parent=self)
         self.sub_tasks.append(sub_task)
         return sub_task
 
