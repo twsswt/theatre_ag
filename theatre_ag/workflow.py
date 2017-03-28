@@ -60,7 +60,7 @@ def treat_as_workflow(workflow_class):
 
                     # TODO Pass function name and indicative cost to a cost calculation function.
                     if hasattr(attribute, 'default_cost'):
-                        actor.incur_delay(attribute.default_cost)
+                        actor.incur_delay(attribute, self, args)
 
                     actor.wait_for_turn()
 
