@@ -10,6 +10,11 @@ School of Computing Science, University of Glasgow.<br/>
 GitHub ID: twsswt<br>
 Email: [timothy.storer@glagow.ac.uk](mailto:timothy.storer@glagow.ac.uk)
 
+Tom Wallis<br/>
+School of Computing Science, University of Glasgow.<br/>
+GitHub ID: probablytom<br>
+Email: [twallisgm@gmail.com](mailto:twallisgm@gmail.com)
+
 # Overview
 
 ## Terminology
