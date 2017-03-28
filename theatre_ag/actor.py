@@ -159,14 +159,15 @@ class Actor(object):
     def wait_for_shutdown(self):
         self.thread.join()
 
-    def calculate_delay(self, attribute, workflow=None, args=()):
+    def calculate_delay(self, entry_point, workflow=None, args=()):
         """
         Implementing classes or mix ins should override this method.  By default, this method will return the supplied
          default cost of the entry point.
+         :param entry_point: a function reference for the task about to be executed.
          :param workflow: the socio-technical context that can be used to calculate the delay.
          :param args: the values to be invoked on the entry point into the workflow
         """
-        return attribute.default_cost
+        return entry_point.default_cost
 
     def incur_delay(self, attribute, workflow=None, args=()):
         delay = self.calculate_delay(attribute, workflow, args)
