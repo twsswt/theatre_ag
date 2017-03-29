@@ -104,6 +104,13 @@ class Actor(object):
         """
         raise Empty()
 
+    def handle_task_return(self, task, value):
+        """
+        Implementing classes or mix ins should override this method.  By default, this method does nothing with a
+        completed task.
+        """
+        pass
+
     def tasks_waiting(self):
         """
         Implementing classes or mix ins should override this method.  By default, this method will return False.
