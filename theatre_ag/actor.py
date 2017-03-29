@@ -174,7 +174,10 @@ class Actor(object):
          :param workflow: the socio-technical context that can be used to calculate the delay.
          :param args: the values to be invoked on the entry point into the workflow
         """
-        return entry_point.default_cost
+        if hasattr(entry_point, 'default_cost'):
+            return entry_point.default_cost
+        else:
+            return 0
 
     def incur_delay(self, attribute, workflow=None, args=()):
         delay = self.calculate_delay(attribute, workflow, args)
