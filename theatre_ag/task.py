@@ -14,11 +14,20 @@ class Task(object):
         self.entry_point = entry_point
 
         if workflow is None:
-            class AnonymousWorkflow(object):
-                is_workflow = True
 
-            self.workflow = AnonymousWorkflow()
-            setattr(self.workflow, entry_point.func_name, entry_point)
+            if hasattr(entry_point, 'im_self'):
+                self.workflow = entry_point.im_self
+
+            elif entry_point.func_closure is not None:
+                self.workflow = entry_point.func_closure[1].cell_contents
+
+            else:
+
+                class AnonymousWorkflow(object):
+                    is_workflow = True
+
+                self.workflow = AnonymousWorkflow()
+                setattr(self.workflow, entry_point.func_name, entry_point)
         else:
             self.workflow = workflow
 

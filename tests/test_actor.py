@@ -109,3 +109,12 @@ class ActorTestCase(TestCase):
         self.run_clock()
 
         self.assertEquals('example_task()[0->1]', str(self.actor.last_task))
+
+    def test_task_with_implicit_state_allocation(self):
+
+        self.actor.allocate_task(self.example_workflow.task_b)
+
+        self.run_clock()
+
+        self.assertEquals('task_b()[0->2]', str(self.actor.last_task))
+
