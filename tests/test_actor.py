@@ -3,11 +3,33 @@ from unittest import TestCase
 from theatre_ag import TaskQueueActor, Idling, SynchronizingClock, default_cost
 
 
+class ExampleWorkflow(object):
+
+    is_workflow = True
+
+    def __init__(self, idling):
+        self.idling = idling
+
+    @default_cost(1)
+    def task_a(self):
+        self.task_b()
+
+    @default_cost(1)
+    def task_b(self):
+        self.idling.idle()
+
+    @default_cost(1)
+    def task_c(self):
+        raise Exception()
+
+
 class ActorTestCase(TestCase):
 
     def setUp(self):
         self.clock = SynchronizingClock(max_ticks=4)
         self.actor = TaskQueueActor(0, self.clock)
+        self.idling = Idling()
+        self.example_workflow = ExampleWorkflow(self.idling)
 
     def run_clock(self):
         self.actor.start()
@@ -16,8 +38,7 @@ class ActorTestCase(TestCase):
 
     def test_explicit_idle(self):
 
-        idling = Idling()
-        self.actor.allocate_task(idling.idle, idling, [])
+        self.actor.allocate_task(self.idling.idle, self.idling)
         self.actor.initiate_shutdown()
 
         self.run_clock()
@@ -32,11 +53,9 @@ class ActorTestCase(TestCase):
 
     def test_finish_tasks_before_shutdown(self):
 
-        idling = Idling()
-        self.actor.allocate_task(idling.idle, idling, [])
-        self.actor.allocate_task(idling.idle, idling, [])
-        self.actor.allocate_task(idling.idle, idling, [])
-
+        self.actor.allocate_task(self.idling.idle, self.idling)
+        self.actor.allocate_task(self.idling.idle, self.idling)
+        self.actor.allocate_task(self.idling.idle, self.idling)
         self.actor.initiate_shutdown()
 
         self.run_clock()
@@ -45,8 +64,7 @@ class ActorTestCase(TestCase):
 
     def test_idling_when_nothing_to_do_after_completed_task(self):
 
-        idling = Idling()
-        self.actor.allocate_task(idling.idle, idling, [])
+        self.actor.allocate_task(self.idling.idle, self.idling)
 
         self.run_clock()
 
@@ -54,25 +72,7 @@ class ActorTestCase(TestCase):
 
     def test_nested_task(self):
 
-        class ExampleWorkflow(object):
-
-            is_workflow = True
-
-            def __init__(self, idling):
-                self.idling = idling
-
-            @default_cost(1)
-            def task_a(self):
-                self.task_b()
-
-            @default_cost(1)
-            def task_b(self):
-                self.idling.idle()
-
-        workflow = ExampleWorkflow(Idling())
-
-        self.actor.allocate_task(workflow.task_a, workflow, [])
-
+        self.actor.allocate_task(self.example_workflow.task_a, self.example_workflow)
         self.actor.initiate_shutdown()
 
         self.run_clock()
@@ -81,27 +81,17 @@ class ActorTestCase(TestCase):
 
     def test_encounter_exception_shutdown_cleanly(self):
 
-        class ExampleWorkflow(object):
-            is_workflow = True
-
-            @default_cost(1)
-            def task_a(self):
-                raise Exception("Example exception.")
-
-        example_task = ExampleWorkflow()
-
-        self.actor.allocate_task(example_task.task_a, example_task)
+        self.actor.allocate_task(self.example_workflow.task_c, self.example_workflow)
 
         self.run_clock()
 
-        self.assertEquals('task_a()[0->1]', str(self.actor.last_task))
+        self.assertEquals('task_c()[0->1]', str(self.actor.last_task))
 
     def test_insufficient_time_shutdown_cleanly(self):
         """
         Demonstrate that actors can shutdown cleanly if their allocated tasks proceed beyond the maximum clock time.
         """
-        idling = Idling()
-        self.actor.allocate_task(idling.idle_for, idling, [5])
+        self.actor.allocate_task(self.idling.idle_for, self.idling, [5])
 
         self.run_clock()
         self.actor.shutdown()
@@ -119,5 +109,3 @@ class ActorTestCase(TestCase):
         self.run_clock()
 
         self.assertEquals('example_task()[0->1]', str(self.actor.last_task))
-
-
