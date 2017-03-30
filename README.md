@@ -150,7 +150,7 @@ states of the cleanliness of your hands can be given as:
 
 The workflow for washing your hands (or anything else that can be washed) is defined using the following class.
 
-    class Wash(object):
+    class WashWorkflow(object):
 
         is_workflow = True
 
@@ -172,12 +172,12 @@ The workflow for washing your hands (or anything else that can be washed) is def
             self.scrub()
             self.rinse()
 
-This workflow can be directly allocated to a TaskQueueActor.  The allocate_task method accepts a workflow instance and
-an entry point, which should be a instance method reference on the same workflow instance.
+An instance of this workflow can be directly allocated to a TaskQueueActor.  The allocate_task method accepts a workflow
+entry point.
 
     hands = Hands()
-    wash = Wash(hands)
-    actor.allocate_task(hands, wash.wash)
+    wash_workflow = WashWorkflow(hands)
+    actor.allocate_task(wash_workflow.wash)
 
 However, if you are dealing with an episode involving a large number of actors, it may be more convenient to specify
 directions to a cast for the episode:
@@ -186,15 +186,15 @@ directions to a cast for the episode:
 
         def apply(self, cast):
             hands = Hands()
-            wash = Wash(hands)
-            cast.members[0].allocate_task(wash, wash.wash)
+            wash_workflow = WashWorkflow(hands)
+            cast.members[0].allocate_task(wash_workflow.wash)
 
 Workflows can be hierarchical, so it is possible to define (in the __init__ method) sub workflows that can be
 invoked from the parent.  For example, suppose we decide that rinsing is a workflow that might be used in several
 different workflows (perhaps a cleaning workflow that doesn't involve soap). Then we can separate out this part of the
 overall workflow like this:
 
-    class Rinse(object):
+    class RinseWorkflow(object):
 
         is_workflow = True
 
@@ -205,7 +205,7 @@ overall workflow like this:
             self.washable.soaped = False
 
 
-    class Wash(object):
+    class WashWorkflow(object):
 
         is_workflow = True
 
