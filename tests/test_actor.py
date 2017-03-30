@@ -112,8 +112,7 @@ class ActorTestCase(TestCase):
     def test_stateless_task_allocation(self):
 
         @default_cost(1)
-        def example_task():
-            print "Hello"
+        def example_task(): pass
 
         self.actor.allocate_task(example_task)
 

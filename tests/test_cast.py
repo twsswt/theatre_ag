@@ -1,7 +1,5 @@
 import unittest
 
-from mock import Mock
-
 from theatre_ag import SynchronizingClock, Cast, TaskQueueActor, Idling
 
 
