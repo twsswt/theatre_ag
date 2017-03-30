@@ -139,7 +139,7 @@ class Actor(object):
                 if task is not None:
                     self._task_history.append(task)
                     self.current_task = task
-                    task.entry_point(*task.args)
+                    self.handle_task_return(task, task.entry_point(*task.args))
 
             except OutOfTurnsException:
                 break
