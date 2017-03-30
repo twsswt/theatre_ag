@@ -11,8 +11,7 @@ class TaskTestCase(unittest.TestCase):
 
     def setUp(self):
 
-        def example_task():
-            pass
+        def example_task(): pass
 
         self.task = Task(example_task)
 
