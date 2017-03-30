@@ -12,7 +12,6 @@ class OutOfTurnsException(Exception):
 
     def __init__(self, actor):
         self.actor = actor
-    pass
 
     def __str__(self):
         return self.actor.logical_name, "out of turns after", self.actor.clock.current_tick, "ticks."
@@ -21,7 +20,7 @@ class OutOfTurnsException(Exception):
 class Actor(object):
     """
     Models the work behaviour of a self-directing entity.  Actors can be assigned tasks described by workflows which are
-    executed in synchronization with actor's clock.
+    executed in synchronization with the actor's clock.
     """
 
     def __init__(self, logical_name, clock):
@@ -99,7 +98,7 @@ class Actor(object):
     def get_next_task(self):
         """
         Implementing classes or mix ins should override this method.  By default, this method will cause an Actor to
-        idle.
+        idle by raising an <code>Empty</cdoe> exception when invoked.
         :raises Empty: if no next task is available.
         """
         raise Empty()
@@ -166,10 +165,12 @@ class Actor(object):
     def wait_for_shutdown(self):
         self.thread.join()
 
+    # noinspection PyMethodMayBeStatic,PyMethodMayBeStatic
     def calculate_delay(self, entry_point, workflow=None, args=()):
         """
-        Implementing classes or mix ins should override this method.  By default, this method will return the supplied
-         default cost of the entry point.
+        Implementing classes or mix ins should override this method.  By default, this method will return the
+        <code>default_cost</code> cost annotation value of the entry point if it exists, 0 if no
+        <code>default_cost</code> annotation is found.
          :param entry_point: a function reference for the task about to be executed.
          :param workflow: the socio-technical context that can be used to calculate the delay.
          :param args: the values to be invoked on the entry point into the workflow
@@ -187,7 +188,7 @@ class Actor(object):
 
     def wait_for_turn(self):
         """
-        A method that blocks while the actor's clock time is less than the time of the actor's next turn.
+        Blocks while the actor's clock time is less than the time of the actor's next turn.
         """
 
         while self.clock.current_tick < self.next_turn:
