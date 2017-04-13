@@ -117,8 +117,6 @@ The perform method behaviour can be configured in a sub-class by implementing th
 
 The <code>TaskQueueActor</code> provides an example of how to override the default implementations of these methods.
 
-## Documentation
+# Documentation
 
- * There is a Jupyter Notebook tutorial available [here](./tutorial.jpnb).
-
-
+ * There is a Jupyter Notebook tutorial available [./tutorial.ipynb](./tutorial.ipynb).
