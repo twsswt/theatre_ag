@@ -8,3 +8,4 @@ dist/
 .project
 .idea
 .pydevproject
+.ipynb_checkpoints
