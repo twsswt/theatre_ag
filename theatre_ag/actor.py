@@ -1,5 +1,6 @@
 import inspect
 import sys
+import traceback
 
 from Queue import Queue, Empty
 from threading import Event, RLock, Thread
@@ -146,6 +147,7 @@ class Actor(object):
             except Exception as e:
                 print >> sys.stderr, "Warning, actor [%s] encountered exception [%s], in workflow [%s]." % \
                                      (self.logical_name, str(e.message), str(task))
+                traceback.print_exc(file=sys.stderr)
                 pass
 
         # Ensure that clock can proceed for other listeners.
