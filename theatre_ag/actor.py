@@ -76,7 +76,7 @@ class Actor(object):
         else:
             return self.last_task.last_non_idling_tick
 
-    def task_count(self, task_func=None):
+    def task_count(self, task_filter=None):
 
         def recursive_task_count(task_history):
 
@@ -86,10 +86,7 @@ class Actor(object):
 
                 result += recursive_task_count(completed_task.sub_tasks)
 
-                func = completed_task.entry_point.im_func if inspect.ismethod(completed_task.entry_point) \
-                    else completed_task.entry_point
-
-                if task_func is None or func.func_name == task_func.im_func.func_name:
+                if filter is None or task_filter(completed_task):
                     result += 1
 
             return result

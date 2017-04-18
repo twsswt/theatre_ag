@@ -44,5 +44,5 @@ class Cast(object):
     def last_tick(self):
         return reduce(max, map(lambda m: m.last_tick, self.members))
 
-    def task_count(self, task):
-        return sum(map(lambda actor: actor.task_count(task), self.members))
+    def task_count(self, task_filter):
+        return sum(map(lambda actor: actor.task_count(task_filter), self.members))

@@ -1,6 +1,8 @@
 """
 @author twsswt
 """
+import inspect
+
 from workflow import Idling
 
 
@@ -49,6 +51,10 @@ class Task(object):
 
     def complete(self, finish_tick):
         self.finish_tick = finish_tick
+
+    @property
+    def entry_point_func (self):
+        return self.entry_point.im_func if inspect.ismethod(self.entry_point) else self.entry_point
 
     @property
     def initiated(self):
