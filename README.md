@@ -27,7 +27,7 @@ Theatre_Ag follows a theatrical metaphor for its API and Architecture.  Core con
  * **Actor** A software agent with it's own thread of control.  Actor execution of activity is regulated by the ticks of
    clock.
 
- * **Setting** The problem domain 'physics' of the simulation environment.  Actors manipulate the setting when
+ * **Scene** The problem domain 'physics' of the simulation environment.  Actors manipulate the setting when
    they execute workflows.
 
  * **Workflow** Task specifications implemented as Plain Old Python Classes.  Workflows describe the sequence of work
