@@ -10,6 +10,9 @@ from .workflow import allocate_workflow_to, Idling
 
 
 class OutOfTurnsException(Exception):
+    """
+    Raised when a theatre actor's task persists beyond the actor's clock's maximum tick.
+    """
 
     def __init__(self, actor):
         self.actor = actor
@@ -168,7 +171,7 @@ class Actor(object):
     def calculate_delay(self, entry_point, workflow=None, args=()):
         """
         Implementing classes or mix ins should override this method.  By default, this method will return the
-        <code>default_cost</code> cost annotation value of the entry point if it exists, 0 if no
+        <code>default_cost</code> cost annotation value of the entry point if it exists, or 0 if no
         <code>default_cost</code> annotation is found.
          :param entry_point: a function reference for the task about to be executed.
          :param workflow: the socio-technical context that can be used to calculate the delay.

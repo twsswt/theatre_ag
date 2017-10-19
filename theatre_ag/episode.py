@@ -1,4 +1,7 @@
 class Episode(object):
+    """
+    An aggregation of the artifacts necessary (clock, cast and directions) to perform a simulation.
+    """
 
     def __init__(self, clock, cast, directions):
         self.clock = clock

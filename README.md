@@ -47,9 +47,9 @@ Theatre_Ag follows a theatrical metaphor for its API and Architecture.  Core con
 ## Timing Model
 
 The timing model in Theatre_Ag was designed with the simulation of socio-technical systems in mind. The timing model is
-designed to represent the observation of time with respect to the
-precision of a clock's tick.  The unit of a clock tick is domain specific, so could represent seconds, weeks or years.
-All actors synchronize the execution of their tasks on the tick of a clock in the simulation.
+designed to represent the observation of time with respect to the precision of a clock's tick.  The unit of a clock tick
+is domain specific, so could represent seconds, weeks or years. All actors synchronize the execution of their tasks on
+the tick of a clock in the simulation.
 
 The clock synchronization design is similar to turn based synchronisation models. It can be summarised as:
 
@@ -65,33 +65,48 @@ above only takes duration 2 then both activities will end at time 3 and the orde
 controlled by Theatre_Ag.  This contrasts with other turn based timing models that are strictly deterministic because
 the order of agent execution during a turn can be pre-determined.
 
-## Actor Task Processing
+## Actors
 
-Actors are implemented as a threaded process managed by the <code>perform</code> method.
+The basic behaviour of actors is implemented in the <code>actor.Actor</code> class.
 
-### Perform Control Loop
+### Task Processing in the Perform Control Loop
 
-The perform method loops repeatedly as long as the actor still has tasks to be performed (<code>tasks_waiting</code> is
-True) or the actor is waiting for more tasks.
+Actors are implemented as a threaded process managed by the <code>perform</code> method. The perform method loops
+repeatedly as long as the actor still has tasks to be performed (<code>tasks_waiting</code> is True) or the actor is
+waiting for more tasks.
 
 Perform follows the following procedure in each loop:
 
-1. Poll for a new task (<code>get_next_task</code>)
-2. If a new task is available then:
-   1. Log the task initiation.
-   2. Calculate the cost of performing the task (<code>calculate_delay</code>) and wait for this number of ticks on the
-      actor's clock.
-   3. Execute the task
-   4. Handle return values from task invocation (<code>handle_task_return</code>)
-   5. Log the completion of the task
-3. Else idle for one tick.
+    Poll for a new task by calling get_next_task()
+    If a new task is available then:
+        Log the task initiation.
+        Calculate the cost of performing the task by calling calculate_delay().
+        Wait for this number of ticks on the actor's clock.
+
+        Execute the task.
+        If task execution is normal then:
+            Pass return values from task invocation to handle_task_return().
+        Else:
+            Silently handle exception
+
+    Log the completion of the task.
+    Else idle for one tick.
+
+Tasks may raise exceptions.  In this circumstance, the task will be immediately terminated with no return value handled.
+However, the actor itself will not halt and will continue to process further tasks as normal.
 
 ### Shutdown
 
-Actors can be terminated if the <code>initiate_shutdown</code> method is invoked.  When this happens all remaining
-available tasks are processed before shutdown.  The <code>wait_for_shutdown</code> method can be invoked once shutdown
-is initiated and will block until all remaining tasks are processed. The Actor will also shutdown automatically if the
-actor's clock reaches its maximum tick.  The actor will
+Actors will idle indefinitely while waiting for tasks to perform. Actor shutdown can happen in three ways:
+
+ * The <code>initiate_shutdown</code> method is invoked.  When this happens, the actor will continue to poll for more
+   tasks by calling  <code>get_next_task()</code>, but will halt as soon as no tasks is returned.
+
+ * The actor's clock reaches it's maximum tick while the actor is idling.  In this case, the actor will immediately
+   halt.
+
+ * The actor's clock reaches it's maximum tick while waiting for the cost period of a task. In this case, the actor
+   will immediately halt.  The current task will be logged as incomplete in the Actor's task history.
 
 ### Configuration
 
