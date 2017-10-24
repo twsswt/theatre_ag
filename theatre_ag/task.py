@@ -82,6 +82,10 @@ class Task(object):
             else:
                 return self.last_non_idling_sub_task.last_non_idling_tick
 
+    @property
+    def entry_point_name(self):
+        return self.entry_point_func.func_name
+
     def __repr__(self):
 
         start_tick = '?' if self.start_tick is None else str(self.start_tick)
@@ -89,4 +93,4 @@ class Task(object):
 
         args = ','.join(map(lambda e: str(e), self.args))
 
-        return '%s(%s)[%s->%s]' % (self.entry_point.func_name, args, start_tick, finish_tick)
+        return '%s(%s)[%s->%s]' % (self.entry_point_name, args, start_tick, finish_tick)
