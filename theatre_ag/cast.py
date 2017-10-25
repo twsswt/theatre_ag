@@ -1,10 +1,10 @@
 class Cast(object):
     """
-    A collection of actors who synchronize their actions on a single clock.
+    A set of actors who synchronize their actions on a single clock.
     """
 
-    def __init__(self):
-        self.members = list()
+    def __init__(self, members=set()):
+        self.members = members
 
     def add_member(self, actor):
         self.members.append(actor)
@@ -20,7 +20,7 @@ class Cast(object):
         """
         Ends the performance by the cast by first initiating the shutdown of all member actors and then waiting for
         their termination.  This method can be safely called when the cast's clock is executed in a separate thread to
-        the invocation.  Otherwise, <code>initiate_shutdown</code> should be called first, then a clock tick issued,
+        the call.  Otherwise, <code>initiate_shutdown</code> should be called first, then a clock tick issued,
         followed by <code>wait_for_shutdown</code>.
         """
         self.initiate_shutdown()
