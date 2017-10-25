@@ -7,7 +7,7 @@ class Cast(object):
         self.members = members
 
     def add_member(self, actor):
-        self.members.append(actor)
+        self.members.add(actor)
 
     def improvise(self, directions):
         directions.apply(self.members)
