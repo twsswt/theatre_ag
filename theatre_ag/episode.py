@@ -1,3 +1,7 @@
+"""
+@author twsswt
+"""
+
 class Episode(object):
     """
     An aggregation of the artifacts necessary (clock, cast and directions) to perform a simulation.

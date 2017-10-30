@@ -1,3 +1,7 @@
+"""
+@author twsswt
+"""
+
 from .actor import Actor, TaskQueueActor
 from .cast import Cast
 from .episode import Episode

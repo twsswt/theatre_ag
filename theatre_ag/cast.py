@@ -1,3 +1,6 @@
+"""
+@author twsswt
+"""
 class Cast(object):
     """
     A set of actors who synchronize their actions on a single clock.
