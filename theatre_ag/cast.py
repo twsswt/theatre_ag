@@ -1,13 +1,15 @@
 """
 @author twsswt
 """
+
+
 class Cast(object):
     """
     A set of actors who synchronize their actions on a single clock.
     """
 
     def __init__(self, members=set()):
-        self.members = members
+        self.members = set(members)
 
     def add_member(self, actor):
         self.members.add(actor)
