@@ -89,8 +89,10 @@ Perform follows the following procedure in each loop:
         Else:
             Silently handle exception
 
-    Log the completion of the task.
-    Else idle for one tick.
+        Log the completion of the task.
+
+    Else:
+        idle for one tick.
 
 Tasks may raise exceptions.  In this circumstance, the task will be immediately terminated with no return value handled.
 However, the actor itself will not halt and will continue to process further tasks as normal.
