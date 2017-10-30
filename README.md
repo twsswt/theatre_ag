@@ -3,7 +3,7 @@
 
 A Python framework for multi-agent simulations, with a particular focus on modelling socio-technical systems.
 
-# Contributors
+## Contributors
 
 Tim Storer<br/>
 School of Computing Science, University of Glasgow.<br/>
@@ -15,9 +15,9 @@ School of Computing Science, University of Glasgow.<br/>
 GitHub ID: probablytom<br>
 Email: [twallisgm@gmail.com](mailto:twallisgm@gmail.com)
 
-# Overview
+## Overview
 
-## Terminology
+### Terminology
 
 Theatre_Ag follows a theatrical metaphor for its API and Architecture.  Core concepts in Theatre_Ag are:
 
@@ -44,7 +44,7 @@ Theatre_Ag follows a theatrical metaphor for its API and Architecture.  Core con
  * **Episode** The specification of a cast of actors, and initial starting conditions (directions) that the cast will
    improvise from.
 
-## Timing Model
+### Timing Model
 
 The timing model in Theatre_Ag was designed with the simulation of socio-technical systems in mind. The timing model is
 designed to represent the observation of time with respect to the precision of a clock's tick.  The unit of a clock tick
@@ -65,11 +65,11 @@ above only takes duration 2 then both activities will end at time 3 and the orde
 controlled by Theatre_Ag.  This contrasts with other turn based timing models that are strictly deterministic because
 the order of agent execution during a turn can be pre-determined.
 
-## Actors
+### Actors
 
 The basic behaviour of actors is implemented in the <code>actor.Actor</code> class.
 
-### Task Processing in the Perform Control Loop
+#### Task Processing in the Perform Control Loop
 
 Actors are implemented as a threaded process managed by the <code>perform</code> method. The perform method loops
 repeatedly as long as the actor still has tasks to be performed (<code>tasks_waiting</code> is True) or the actor is
@@ -95,7 +95,7 @@ Perform follows the following procedure in each loop:
 Tasks may raise exceptions.  In this circumstance, the task will be immediately terminated with no return value handled.
 However, the actor itself will not halt and will continue to process further tasks as normal.
 
-### Shutdown
+#### Shutdown
 
 Actors will idle indefinitely while waiting for tasks to perform. Actor shutdown can happen in three ways:
 
@@ -108,7 +108,7 @@ Actors will idle indefinitely while waiting for tasks to perform. Actor shutdown
  * The actor's clock reaches it's maximum tick while waiting for the cost period of a task. In this case, the actor
    will immediately halt.  The current task will be logged as incomplete in the Actor's task history.
 
-### Configuration
+#### Configuration
 
 The perform method behaviour can be configured in a sub-class by implementing the following three methods:
 
@@ -132,6 +132,6 @@ The perform method behaviour can be configured in a sub-class by implementing th
 
 The <code>TaskQueueActor</code> provides an example of how to override the default implementations of these methods.
 
-# Documentation
+## Documentation
 
  * There is a Jupyter Notebook tutorial available [./tutorial.ipynb](./tutorial.ipynb).
