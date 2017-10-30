@@ -53,6 +53,18 @@ class Task(object):
         self.finish_tick = finish_tick
 
     @property
+    def siblings(self):
+        return None if self.parent is None else self.parent.sub_tasks
+
+    @property
+    def is_last_sibling(self):
+        return self.parent is not None and self.siblings.index(self) == len(self.siblings) - 1
+
+    @property
+    def has_siblings(self):
+        return self.siblings is not None and len(self.siblings) > 0
+
+    @property
     def entry_point_func (self):
         return self.entry_point.im_func if inspect.ismethod(self.entry_point) else self.entry_point
 
@@ -94,3 +106,24 @@ class Task(object):
         args = ','.join(map(lambda e: str(e), self.args))
 
         return '%s(%s)[%s->%s]' % (self.entry_point_name, args, start_tick, finish_tick)
+
+
+def format_task_trees(tasks, indent=""):
+    result = ""
+    for task in tasks:
+        result += format_task_tree(task, indent)
+    return result
+
+
+def format_task_tree(task, indent=""):
+
+    arrow_mid = "+" if len(task.sub_tasks) > 0 else "-"
+    arrow_tail = "-" if task.parent is None else "+" if task.is_last_sibling else "+"
+
+    result = indent + arrow_tail + "-" + arrow_mid + "-> " + str(task) + "\n"
+
+    indent += "| " if task.has_siblings and not task.is_last_sibling else "  "
+
+    result += format_task_trees(task.sub_tasks, indent)
+
+    return result
