@@ -142,5 +142,5 @@ The <code>TaskQueueActor</code> provides an example of how to override the defau
 ## Tutorials and Examples
 
  * There is a Jupyter Notebook tutorial available [./tutorial.ipynb](./tutorial.ipynb).
- * An example of using Theatre_Ag for modelling TCP connections over an IP network is [here](https://github.com/twsswt/theatre_tcp_ip)
- * An example of using Theatre_Ag for modelling algorithmic trading is [here](https://github.com/twsswt/pyagora).
+ * [TCP connections over an IP network](https://github.com/twsswt/theatre_tcp_ip) example
+ * [Algorithmic trading](https://github.com/twsswt/pyagora) example.
