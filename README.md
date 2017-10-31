@@ -17,34 +17,39 @@ Email: [twallisgm@gmail.com](mailto:twallisgm@gmail.com)
 
 ## Overview
 
-### Terminology
+Theatre_Ag is a workflow oriented agent based simulation environment.  Theatre_Ag is designed to enable experimenters to
+specify readable workflows directly as collections of related methods organised into Plain Old Python Classes that are
+executed by the agents in the simulation.  All other simulation machinery (critically task duration and clock
+synchronization is handled internally by the simulation environment.
+
+## Terminology
 
 Theatre_Ag follows a theatrical metaphor for its API and Architecture.  Core concepts in Theatre_Ag are:
 
- * **Clock** All activity in a Theatre_Ag simulation is executed with respect to a clock object that issues clock ticks
+ * **Clock:** All activity in a Theatre_Ag simulation is executed with respect to a clock object that issues clock ticks
    up to a specified limit.
 
- * **Actor** A software agent with it's own thread of control.  Actor execution of activity is regulated by the ticks of
+ * **Actor:** A software agent with it's own thread of control.  Actor execution of activity is regulated by the ticks of
    clock.
 
- * **Scene** The problem domain 'physics' of the simulation environment.  Actors manipulate the setting when
+ * **Scene:** The problem domain 'physics' of the simulation environment.  Actors manipulate the setting when
    they execute workflows.
 
- * **Workflow** Task specifications implemented as Plain Old Python Classes.  Workflows describe the sequence of work
+ * **Workflow:** Task specifications implemented as Plain Old Python Classes.  Workflows describe the sequence of work
    items
    and decisions taken by actors when the workflow is executed and any state that is maintained during execution,
    allowing actors to influence the shared environment of a problem domain.
    Workflows can also be annotated with the costs of performing individual work items.
 
- * **Task** An instantiation of a workflow, comprising task meta data and an instance of workflow.  Individual tasks can
+ * **Task:** An instantiation of a workflow, comprising task meta data and an instance of workflow.  Individual tasks can
    be stateful and are permitted
 
- * **Cast** A collection of actors who will collaborate in a Theatre_Ag simulation.
+ * **Cast:** A collection of actors who will collaborate in a Theatre_Ag simulation.
 
- * **Episode** The specification of a cast of actors, and initial starting conditions (directions) that the cast will
+ * **Episode:** The specification of a cast of actors, and initial starting conditions (directions) that the cast will
    improvise from.
 
-### Timing Model
+## Timing Model
 
 The timing model in Theatre_Ag was designed with the simulation of socio-technical systems in mind. The timing model is
 designed to represent the observation of time with respect to the precision of a clock's tick.  The unit of a clock tick
@@ -65,11 +70,11 @@ above only takes duration 2 then both activities will end at time 3 and the orde
 controlled by Theatre_Ag.  This contrasts with other turn based timing models that are strictly deterministic because
 the order of agent execution during a turn can be pre-determined.
 
-### Actors
+## Actors
 
 The basic behaviour of actors is implemented in the <code>actor.Actor</code> class.
 
-#### Task Processing in the Perform Control Loop
+### Task Processing in the Perform Control Loop
 
 Actors are implemented as a threaded process managed by the <code>perform</code> method. The perform method loops
 repeatedly as long as the actor still has tasks to be performed (<code>tasks_waiting</code> is True) or the actor is
@@ -97,7 +102,7 @@ Perform follows the following procedure in each loop:
 Tasks may raise exceptions.  In this circumstance, the task will be immediately terminated with no return value handled.
 However, the actor itself will not halt and will continue to process further tasks as normal.
 
-#### Shutdown
+### Shutdown
 
 Actors will idle indefinitely while waiting for tasks to perform. Actor shutdown can happen in three ways:
 
@@ -110,7 +115,7 @@ Actors will idle indefinitely while waiting for tasks to perform. Actor shutdown
  * The actor's clock reaches it's maximum tick while waiting for the cost period of a task. In this case, the actor
    will immediately halt.  The current task will be logged as incomplete in the Actor's task history.
 
-#### Configuration
+### Configuration
 
 The perform method behaviour can be configured in a sub-class by implementing the following three methods:
 
@@ -134,6 +139,6 @@ The perform method behaviour can be configured in a sub-class by implementing th
 
 The <code>TaskQueueActor</code> provides an example of how to override the default implementations of these methods.
 
-## Documentation
+## Tutorials and Examples
 
  * There is a Jupyter Notebook tutorial available [./tutorial.ipynb](./tutorial.ipynb).
