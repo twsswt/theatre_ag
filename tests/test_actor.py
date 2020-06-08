@@ -20,7 +20,7 @@ class ExampleWorkflow(object):
 
     @default_cost(1)
     def task_c(self):
-        raise Exception()
+        raise Exception('An expected exception.')
 
 
 class ActorTestCase(TestCase):

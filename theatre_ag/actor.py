@@ -148,10 +148,9 @@ class Actor(object):
             except OutOfTurnsException:
                 break
             except Exception as e:
-                print("Warning, actor [%s] encountered exception [%s], in workflow [%s]." % \
+                print("Warning, actor [%s] encountered exception [%s], in workflow [%s]." %
                                      (self.logical_name, str(e), str(task), ), file=sys.stderr)
                 traceback.print_exc(file=sys.stderr)
-                pass
 
         # Ensure that clock can proceed for other listeners.
         self.clock.remove_tick_listener(self)
