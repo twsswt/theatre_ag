@@ -30,7 +30,7 @@ class TeamTestCase(unittest.TestCase):
         self.cast.wait_for_shutdown()
 
         for actor in self.cast.members:
-            self.assertEquals('idle()[0->1]', str(actor.last_task))
+            self.assertEqual('idle()[0->1]', str(actor.last_task))
 
 
 if __name__ == '__main__':
