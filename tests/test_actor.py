@@ -37,19 +37,18 @@ class ActorTestCase(TestCase):
         self.clock.wait_for_last_tick()
 
     def test_explicit_idle(self):
-
         self.actor.allocate_task(self.idling.idle, self.idling)
         self.actor.initiate_shutdown()
 
         self.run_clock()
 
-        self.assertEquals(1, self.actor.last_task.finish_tick)
+        self.assertEqual(1, self.actor.last_task.finish_tick)
 
     def test_idling_when_nothing_to_do(self):
 
         self.run_clock()
 
-        self.assertEquals(0, len(self.actor.task_history))
+        self.assertEqual(0, len(self.actor.task_history))
 
     def test_finish_tasks_before_shutdown(self):
 
@@ -60,7 +59,7 @@ class ActorTestCase(TestCase):
 
         self.run_clock()
 
-        self.assertEquals(3, self.actor.last_task.finish_tick)
+        self.assertEqual(3, self.actor.last_task.finish_tick)
 
     def test_idling_when_nothing_to_do_after_completed_task(self):
 
@@ -68,7 +67,7 @@ class ActorTestCase(TestCase):
 
         self.run_clock()
 
-        self.assertEquals(1, self.actor.last_task.finish_tick)
+        self.assertEqual(1, self.actor.last_task.finish_tick)
 
     def test_nested_task(self):
 
@@ -77,7 +76,7 @@ class ActorTestCase(TestCase):
 
         self.run_clock()
 
-        self.assertEquals(self.actor.last_task.finish_tick, 3)
+        self.assertEqual(self.actor.last_task.finish_tick, 3)
 
     def test_encounter_exception_shutdown_cleanly(self):
 
@@ -85,7 +84,7 @@ class ActorTestCase(TestCase):
 
         self.run_clock()
 
-        self.assertEquals('task_c()[0->1]', str(self.actor.last_task))
+        self.assertEqual('task_c()[0->1]', str(self.actor.last_task))
 
     def test_insufficient_time_shutdown_cleanly(self):
         """
@@ -96,8 +95,8 @@ class ActorTestCase(TestCase):
         self.run_clock()
         self.actor.shutdown()
 
-        self.assertEquals(5, len(self.actor._task_history[0].sub_tasks))
-        self.assertEquals(None, self.actor._task_history[0].finish_tick)
+        self.assertEqual(5, len(self.actor._task_history[0].sub_tasks))
+        self.assertEqual(None, self.actor._task_history[0].finish_tick)
 
     def test_stateless_task_allocation(self):
 
@@ -108,7 +107,7 @@ class ActorTestCase(TestCase):
 
         self.run_clock()
 
-        self.assertEquals('example_task()[0->1]', str(self.actor.last_task))
+        self.assertEqual('example_task()[0->1]', str(self.actor.last_task))
 
     def test_task_with_implicit_state_allocation(self):
 
@@ -116,5 +115,5 @@ class ActorTestCase(TestCase):
 
         self.run_clock()
 
-        self.assertEquals('task_b()[0->2]', str(self.actor.last_task))
+        self.assertEqual('task_b()[0->2]', str(self.actor.last_task))
 

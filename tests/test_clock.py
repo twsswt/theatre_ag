@@ -1,10 +1,10 @@
 import unittest
-from mock import Mock
+from unittest.mock import Mock
 
 from theatre_ag import SynchronizingClock
 
 # noinspection PyProtectedMember
-from threading import _Event
+from threading import Event
 
 
 class ClockTestCase(unittest.TestCase):
@@ -15,7 +15,7 @@ class ClockTestCase(unittest.TestCase):
     def test_synchronization(self):
 
         self.tick_listener = Mock()
-        self.tick_listener.waiting_for_tick = Mock(spec=_Event)
+        self.tick_listener.waiting_for_tick = Mock(spec=Event)
 
         self.clock.add_tick_listener(self.tick_listener)
 

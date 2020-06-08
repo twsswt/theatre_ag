@@ -6,7 +6,7 @@ import inspect
 import sys
 import traceback
 
-from Queue import Queue, Empty
+from queue import Queue, Empty
 from threading import Event, RLock, Thread
 
 from .task import Task
@@ -67,7 +67,7 @@ class Actor(object):
 
     @property
     def task_history(self):
-        return filter(lambda task: task.workflow.logging is not False, self._task_history)
+        return list(filter(lambda task: task.workflow.logging is not False, self._task_history))
 
     @property
     def last_task(self):
@@ -133,10 +133,9 @@ class Actor(object):
             try:
                 try:
                     task = self.get_next_task()
-
-                    entry_point_name = task.entry_point.func_name
+                    entry_point_name = task.entry_point.__name__
                     allocate_workflow_to(self, task.workflow)
-                    task.entry_point = task.workflow.__getattribute__(entry_point_name)
+                    task.entry_point = task.workflow.__class__.__getattribute__(task.workflow, entry_point_name)
 
                 except Empty:
                     task = Task(self.idling.idle, self.idling)
@@ -149,8 +148,8 @@ class Actor(object):
             except OutOfTurnsException:
                 break
             except Exception as e:
-                print >> sys.stderr, "Warning, actor [%s] encountered exception [%s], in workflow [%s]." % \
-                                     (self.logical_name, str(e.message), str(task))
+                print("Warning, actor [%s] encountered exception [%s], in workflow [%s]." % \
+                                     (self.logical_name, str(e), str(task), ), file=sys.stderr)
                 traceback.print_exc(file=sys.stderr)
                 pass
 
@@ -231,8 +230,9 @@ class TaskQueueActor(Actor):
     def tasks_waiting(self):
         return not self.task_queue.empty()
 
-    def allocate_task(self, entry_point=None, workflow=None, args=list()):
-
+    def allocate_task(self, entry_point=None, workflow=None, args=None):
+        if args is None:
+            args = list()
         allocated_task = Task(entry_point, workflow, args)
         self.task_queue.put(allocated_task)
         return allocated_task

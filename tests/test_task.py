@@ -20,7 +20,7 @@ class TaskTestCase(unittest.TestCase):
         The main task has been initiated.
         """
         self.task.initiate(1)
-        self.assertEquals(1, self.task.last_non_idling_tick)
+        self.assertEqual(1, self.task.last_non_idling_tick)
 
     def test_last_non_idling_tick_b(self):
         """
@@ -28,7 +28,7 @@ class TaskTestCase(unittest.TestCase):
         """
         self.task.initiate(1)
         self.task.complete(2)
-        self.assertEquals(2, self.task.last_non_idling_tick)
+        self.assertEqual(2, self.task.last_non_idling_tick)
 
     def test_last_non_idling_tick_c(self):
         """
@@ -38,7 +38,7 @@ class TaskTestCase(unittest.TestCase):
         self.task.initiate(1)
         sub_task = self.task.append_sub_task(example_sub_task)
         sub_task.initiate(2)
-        self.assertEquals(2, self.task.last_non_idling_tick)
+        self.assertEqual(2, self.task.last_non_idling_tick)
 
     def test_last_non_idling_tick_d(self):
         """
@@ -49,7 +49,7 @@ class TaskTestCase(unittest.TestCase):
         sub_task = self.task.append_sub_task(example_sub_task)
         sub_task.initiate(2)
         sub_task.complete(3)
-        self.assertEquals(3, self.task.last_non_idling_tick)
+        self.assertEqual(3, self.task.last_non_idling_tick)
 
     def test_last_non_idling_tick_e(self):
         """
@@ -61,7 +61,7 @@ class TaskTestCase(unittest.TestCase):
         sub_task.initiate(2)
         sub_task.complete(3)
         self.task.complete(4)
-        self.assertEquals(4, self.task.last_non_idling_tick)
+        self.assertEqual(4, self.task.last_non_idling_tick)
 
     def test_last_non_idling_tick_f(self):
         """
@@ -72,7 +72,7 @@ class TaskTestCase(unittest.TestCase):
         sub_task = self.task.append_sub_task(Idling.idle, Idling)
         sub_task.initiate(2)
         sub_task.complete(3)
-        self.assertEquals(1, self.task.last_non_idling_tick)
+        self.assertEqual(1, self.task.last_non_idling_tick)
 
     def test_last_non_idling_tick_g(self):
         """
@@ -84,7 +84,7 @@ class TaskTestCase(unittest.TestCase):
         sub_task.initiate(2)
         sub_task.complete(3)
         self.task.complete(4)
-        self.assertEquals(4, self.task.last_non_idling_tick)
+        self.assertEqual(4, self.task.last_non_idling_tick)
 
     def test_last_non_idling_tick_h(self):
         """
@@ -99,7 +99,7 @@ class TaskTestCase(unittest.TestCase):
 
         sub_task = self.task.append_sub_task(example_sub_task)
         sub_task.initiate(4)
-        self.assertEquals(4, self.task.last_non_idling_tick)
+        self.assertEqual(4, self.task.last_non_idling_tick)
 
     def test_last_non_idling_tick_i(self):
         """
@@ -116,7 +116,7 @@ class TaskTestCase(unittest.TestCase):
         idling_sub_task.initiate(4)
         idling_sub_task.complete(5)
 
-        self.assertEquals(3, self.task.last_non_idling_tick)
+        self.assertEqual(3, self.task.last_non_idling_tick)
 
     def test_last_non_idling_tick_j(self):
         """
@@ -133,7 +133,7 @@ class TaskTestCase(unittest.TestCase):
         idling_sub_task.initiate(4)
         idling_sub_task.complete(5)
 
-        self.assertEquals(3, self.task.last_non_idling_tick)
+        self.assertEqual(3, self.task.last_non_idling_tick)
 
 
 if __name__ == '__main__':

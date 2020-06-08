@@ -65,7 +65,7 @@ def treat_as_workflow(workflow_class):
                     actor.wait_for_turn()
 
                     try:
-                        return attribute.im_func(self, *args, **kwargs) if inspect.ismethod(attribute) \
+                        return attribute.__func__(self, *args, **kwargs) if inspect.ismethod(attribute) \
                             else attribute(*args, **kwargs)
                     finally:
                         actor.log_task_completion()
@@ -74,9 +74,9 @@ def treat_as_workflow(workflow_class):
                     return attribute.im_func(self, *args, **kwargs)
 
             if inspect.ismethod(attribute):
-                sync_wrap.func_name = attribute.im_func.func_name
+                sync_wrap.__name__ = attribute.__func__.__name__
             else:
-                sync_wrap.func_name = attribute.func_name
+                sync_wrap.__name__ = attribute.__name__
 
             return sync_wrap
 
