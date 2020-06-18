@@ -9,3 +9,5 @@ dist/
 .idea
 .pydevproject
 .ipynb_checkpoints
+
+venv-x/

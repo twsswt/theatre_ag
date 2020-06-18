@@ -4,7 +4,7 @@
 
 import inspect
 
-from workflow import Idling
+from .workflow import Idling
 
 
 class Task(object):
@@ -21,8 +21,8 @@ class Task(object):
             if hasattr(entry_point, 'im_self'):
                 self.workflow = entry_point.im_self
 
-            elif entry_point.func_closure is not None:
-                self.workflow = entry_point.func_closure[1].cell_contents
+            elif entry_point.__closure__ is not None:
+                self.workflow = entry_point.__closure__[1].cell_contents
 
             else:
 
@@ -30,7 +30,7 @@ class Task(object):
                     is_workflow = True
 
                 self.workflow = AnonymousWorkflow()
-                setattr(self.workflow, entry_point.func_name, entry_point)
+                setattr(self.workflow, entry_point.__name__, entry_point)
         else:
             self.workflow = workflow
 
@@ -67,7 +67,7 @@ class Task(object):
 
     @property
     def entry_point_func (self):
-        return self.entry_point.im_func if inspect.ismethod(self.entry_point) else self.entry_point
+        return self.entry_point.__func__ if inspect.ismethod(self.entry_point) else self.entry_point
 
     @property
     def initiated(self):
@@ -79,7 +79,7 @@ class Task(object):
 
     @property
     def non_idling_sub_tasks(self):
-        return filter(lambda t: t.workflow is not Idling, self.sub_tasks)
+        return list(filter(lambda t: t.workflow is not Idling, self.sub_tasks))
 
     @property
     def last_non_idling_sub_task(self):
@@ -97,7 +97,7 @@ class Task(object):
 
     @property
     def entry_point_name(self):
-        return self.entry_point_func.func_name
+        return self.entry_point_func.__name__
 
     def __repr__(self):
 
