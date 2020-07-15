@@ -18,8 +18,9 @@ class Task(object):
 
         if workflow is None:
 
-            if hasattr(entry_point, 'im_self'):
-                self.workflow = entry_point.im_self
+            if hasattr(entry_point, '__self__'):
+
+                self.workflow = entry_point.__self__
 
             elif entry_point.__closure__ is not None:
                 self.workflow = entry_point.__closure__[1].cell_contents
