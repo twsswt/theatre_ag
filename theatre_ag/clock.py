@@ -25,7 +25,7 @@ class SynchronizingClock(object):
 
     @property
     def will_tick_again(self):
-        return self.current_tick < self.max_ticks and self.issue_ticks
+        return (self.max_ticks < 0 or self.current_tick < self.max_ticks) and self.issue_ticks
 
     def start(self):
         self._thread.start()
@@ -64,7 +64,7 @@ class SynchronizingClock(object):
             tick_listener.notify_new_tick()
 
     def tick_toc(self):
-        while self.issue_ticks and self.current_tick < self.max_ticks:
+        while self.will_tick_again:
             self.tick()
 
     def __str__(self):
