@@ -10,4 +10,5 @@ setup(
     author='Tim Storer',
     author_email='timothy.storer@glasgow.ac.uk',
     description='A framework for developing agent oriented simulations.',
+    zip_safe=False
 )
