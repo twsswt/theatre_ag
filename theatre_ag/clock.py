@@ -1,7 +1,3 @@
-"""
-@author twsswt
-"""
-
 from threading import Thread, Lock
 
 

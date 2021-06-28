@@ -1,7 +1,3 @@
-"""
-@author twsswt
-"""
-
 import inspect
 
 
@@ -87,7 +83,6 @@ def treat_as_workflow(workflow_class):
 
 
 class Idling(object):
-
     """
     A workflow that allows an actor to waste a turn.
     """

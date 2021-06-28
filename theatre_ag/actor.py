@@ -1,8 +1,3 @@
-"""
-@author twsswt
-"""
-
-import inspect
 import sys
 import traceback
 
@@ -103,7 +98,7 @@ class Actor(object):
     def get_next_task(self):
         """
         Implementing classes or mix ins should override this method.  By default, this method will cause an Actor to
-        idle by raising an <code>Empty</cdoe> exception when invoked.
+        idle by raising an <code>Empty</code> exception when invoked.
         :raises Empty: if no next task is available.
         """
         raise Empty()

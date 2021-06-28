@@ -1,8 +1,3 @@
-"""
-@author twsswt
-"""
-
-
 class Cast(object):
     """
     A set of actors who synchronize their actions on a single clock.
@@ -24,7 +19,8 @@ class Cast(object):
     def shutdown(self):
         """
         Ends the performance by the cast by first initiating the shutdown of all member actors and then waiting for
-        their termination.  This method can be safely called when the cast's clock is executed in a separate thread to
+        their termination (equivalent to calling <code>initiate_shutdown()</code> then <code>wait_for_shutdown()</code>.
+        This method can be safely called when the cast's clock is executed in a separate thread to
         the call.  Otherwise, <code>initiate_shutdown</code> should be called first, then a clock tick issued,
         followed by <code>wait_for_shutdown</code>.
         """
