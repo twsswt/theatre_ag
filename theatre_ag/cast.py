@@ -9,6 +9,12 @@ class Cast(object):
     def add_member(self, actor):
         self.members.add(actor)
 
+    def get_member(self, name):
+        for member in self.members:
+            if member.name == name:
+                return member
+        return None
+
     def improvise(self, directions):
         directions.apply(self.members)
 

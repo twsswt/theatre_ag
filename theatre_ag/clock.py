@@ -43,13 +43,17 @@ class SynchronizingClock(object):
         self._tick_listeners.remove(listener)
         self._tick_listeners_lock.release()
 
+    def get_cache_of_tick_listeners(self):
+        self._tick_listeners_lock.acquire()
+        cached_tick_listeners = list(self._tick_listeners)
+        self._tick_listeners_lock.release()
+        return cached_tick_listeners
+
     def tick(self):
         """
         Issues a tick once all registered tick listeners are waiting for them.
         """
-        self._tick_listeners_lock.acquire()
-        cached_tick_listeners = list(self._tick_listeners)
-        self._tick_listeners_lock.release()
+        cached_tick_listeners = self.get_cache_of_tick_listeners()
 
         for tick_listener in cached_tick_listeners:
             tick_listener.waiting_for_tick.wait()

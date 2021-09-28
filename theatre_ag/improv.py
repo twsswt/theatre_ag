@@ -9,6 +9,7 @@ class Improv:
         self.cast = cast
         self.blocked = True
 
-    def perform(self):
-        self.clock.start()
+    def perform(self, start_clock=True):
+        if start_clock:
+            self.clock.start()
         self.cast.start()
