@@ -15,6 +15,10 @@ class Cast(object):
                 return member
         return None
 
+    @property
+    def member_names(self):
+        return {member.name for member in self.members}
+
     def improvise(self, directions):
         directions.apply(self.members)
 
