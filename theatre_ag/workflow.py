@@ -67,7 +67,7 @@ def treat_as_workflow(workflow_class):
                         actor.log_task_completion()
                         actor.busy.release()
                 else:
-                    return attribute.im_func(self, *args, **kwargs)
+                    return attribute.__func__(self, *args, **kwargs)
 
             if inspect.ismethod(attribute):
                 sync_wrap.__name__ = attribute.__func__.__name__
