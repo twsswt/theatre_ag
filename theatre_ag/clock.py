@@ -53,6 +53,10 @@ class SynchronizingClock(object):
         """
         Issues a tick once all registered tick listeners are waiting for them.
         """
+        if self.will_tick_again:
+            self._tick()
+
+    def _tick(self):
         cached_tick_listeners = self.get_cache_of_tick_listeners()
 
         for tick_listener in cached_tick_listeners:
@@ -65,7 +69,7 @@ class SynchronizingClock(object):
 
     def tick_toc(self):
         while self.will_tick_again:
-            self.tick()
+            self._tick()
 
     def __str__(self):
         return "c(%d of %d)" % (self.current_tick, self.max_ticks)
