@@ -1,5 +1,7 @@
 import inspect
 
+import threading
+
 
 def default_cost(cost=0):
     def workflow_decorator(func):
@@ -8,13 +10,12 @@ def default_cost(cost=0):
     return workflow_decorator
 
 
-def allocate_workflow_to(actor, workflow, logging=True):
+def allocate_workflow_to(workflow, logging=True):
     """
     Allocates the workflow to the specified actor for timing synchronization purposes.  The members of the workflow are
     recursively inspected.  Any member with the class attribute 'is_workflow' is also allocated to this actor if it has
     not previously been allocated to another actor.
     """
-    workflow.actor = actor
     workflow.logging = logging
 
     workflow_class = workflow.__class__
@@ -23,8 +24,8 @@ def allocate_workflow_to(actor, workflow, logging=True):
         treat_as_workflow(workflow_class)
 
     for name, member in inspect.getmembers(workflow):
-        if hasattr(member.__class__, 'is_workflow') and not hasattr(member, 'actor'):
-            allocate_workflow_to(actor, member, logging)
+        if hasattr(member.__class__, 'is_workflow'):
+            allocate_workflow_to(member, logging)
 
 
 def treat_as_workflow(workflow_class):
@@ -46,10 +47,9 @@ def treat_as_workflow(workflow_class):
         elif inspect.ismethod(attribute) or inspect.isfunction(attribute):
 
             def sync_wrap(*args, **kwargs):
-
-                if hasattr(self, 'actor'):
-
-                    actor = self.actor
+                current_thread = threading.current_thread()
+                if hasattr(current_thread, 'actor'):
+                    actor = current_thread.actor
 
                     actor.busy.acquire()
                     actor.log_task_initiation(attribute, self, args)

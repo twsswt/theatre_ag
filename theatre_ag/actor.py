@@ -38,6 +38,7 @@ class Actor(object):
         self.busy = RLock()
         self.wait_for_directions = True
         self.thread = Thread(target=self.perform)
+        self.thread.actor = self
 
         self.clock.add_tick_listener(self)
 
@@ -45,7 +46,7 @@ class Actor(object):
         self.current_task = None
 
         self.idling = Idling()
-        allocate_workflow_to(self, self.idling, logging=False)
+        allocate_workflow_to(self.idling, logging=False)
 
         self.next_turn = 0
 
@@ -129,7 +130,7 @@ class Actor(object):
                 try:
                     task = self.get_next_task()
                     entry_point_name = task.entry_point.__name__
-                    allocate_workflow_to(self, task.workflow)
+                    allocate_workflow_to(task.workflow)
                     task.entry_point = task.workflow.__class__.__getattribute__(task.workflow, entry_point_name)
 
                 except Empty:
