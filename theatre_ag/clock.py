@@ -57,7 +57,6 @@ class SynchronizingClock(object):
             self._tick()
 
     def _tick(self):
-        print("preparing to tick...")
         cached_tick_listeners = self.get_cache_of_tick_listeners()
 
         for tick_listener in cached_tick_listeners:
