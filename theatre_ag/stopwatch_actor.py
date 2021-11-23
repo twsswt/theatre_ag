@@ -3,7 +3,7 @@ from .workflow import Idling
 from .task import Task
 
 
-class StopwatchWorkflow:
+class _StopwatchWorkflow:
 
     is_workflow = True
 
@@ -25,12 +25,12 @@ class StopwatchWorkflow:
 
 class StopwatchActor(Actor):
     """
-
+    An actor with the repeated task of tracking time on what clock to enable a tick on a parent clock.
     """
 
     def __init__(self, logical_name,  clock, parent_clock, granularity, precision=lambda granularity: granularity):
         super(StopwatchActor, self).__init__(logical_name, clock)
-        self._stopwatch_worfklow = StopwatchWorkflow(parent_clock, granularity, precision)
+        self._stopwatch_worfklow = _StopwatchWorkflow(parent_clock, granularity, precision)
 
     def get_next_task(self):
         return Task(self._stopwatch_worfklow.issue_tick,  self._stopwatch_worfklow)

@@ -3,7 +3,7 @@ from threading import Thread, Lock
 
 class SynchronizingClock(object):
 
-    def __init__(self, max_ticks=1):
+    def __init__(self, max_ticks=None):
         self.max_ticks = max_ticks
 
         self._ticks = 0
@@ -21,7 +21,7 @@ class SynchronizingClock(object):
 
     @property
     def will_tick_again(self):
-        return (self.max_ticks < 0 or self.current_tick < self.max_ticks) and self.issue_ticks
+        return (self.max_ticks is None or self.current_tick < self.max_ticks) and self.issue_ticks
 
     def start(self):
         self._thread.start()
@@ -57,6 +57,7 @@ class SynchronizingClock(object):
             self._tick()
 
     def _tick(self):
+        print("preparing to tick...")
         cached_tick_listeners = self.get_cache_of_tick_listeners()
 
         for tick_listener in cached_tick_listeners:
