@@ -1,3 +1,5 @@
+import threading
+
 from .actor import Actor
 from .workflow import Idling
 from .task import Task
@@ -15,7 +17,7 @@ class _StopwatchWorkflow:
         self.idling = Idling()
 
     def _calculate_next_time_period(self):
-        return self._precision(self._granularity - 1)
+        return max(self._precision(self._granularity - 1), 1)
 
     def issue_tick(self):
         time_period = self._calculate_next_time_period()
