@@ -31,13 +31,14 @@ class StopwatchActor(Actor):
     """
 
     def __init__(self, logical_name,  clock, parent_clock, granularity, precision=lambda granularity: granularity):
-        super(StopwatchActor, self).__init__(logical_name, clock)
+        super(StopwatchActor, self).__init__(f'stopwatch for {logical_name} layer', clock)
         self._stopwatch_worfklow = _StopwatchWorkflow(parent_clock, granularity, precision)
+        self.tracking = True
 
     def get_next_task(self):
         return Task(self._stopwatch_worfklow.issue_tick,  self._stopwatch_worfklow)
 
     def tasks_waiting(self):
-        return True
+        return self.tracking
 
 
