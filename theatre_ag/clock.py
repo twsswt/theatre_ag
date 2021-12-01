@@ -23,6 +23,9 @@ class SynchronizingClock(object):
     def will_tick_again(self):
         return (self.max_ticks is None or self.current_tick < self.max_ticks) and self.issue_ticks
 
+    def will_tick_another(self, delay):
+        return (self.max_ticks is None or self.current_tick + delay <= self.max_ticks) and self.issue_ticks
+
     def start(self):
         self._thread.start()
 
@@ -72,4 +75,4 @@ class SynchronizingClock(object):
             self._tick()
 
     def __str__(self):
-        return "c(%d of %d)" % (self.current_tick, self.max_ticks)
+        return f"c({self.current_tick} of {self.max_ticks})"
