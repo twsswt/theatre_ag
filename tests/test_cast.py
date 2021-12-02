@@ -32,6 +32,14 @@ class TeamTestCase(unittest.TestCase):
         for actor in self.cast.members:
             self.assertEqual('idle()[0->1]', str(actor.last_task))
 
+    def test_multiple_starts(self):
+        self.cast.add_member(TaskQueueActor('alice', self.clock))
+        self.cast.start()
+        self.cast.start()
+        self.cast.initiate_shutdown()
+        self.clock.tick()
+        self.cast.wait_for_shutdown()
+
 
 if __name__ == '__main__':
     unittest.main()

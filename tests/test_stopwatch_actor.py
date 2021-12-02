@@ -50,8 +50,10 @@ class StopwatchActorTestCase(unittest.TestCase):
             seconds_clock.tick()
 
         # Ensure final ticks are released to parent clock before testing state.
-        minutes_stopwatch_actor.shutdown()
-        hours_stopwatch_actor.shutdown()
+        minutes_stopwatch_actor.initiate_shutdown()
+        hours_stopwatch_actor.initiate_shutdown()
+        minutes_stopwatch_actor.wait_for_shutdown()
+        hours_stopwatch_actor.wait_for_shutdown()
 
         self.assertEqual(3600, seconds_clock.current_tick)
         self.assertEqual(60, minutes_clock.current_tick)

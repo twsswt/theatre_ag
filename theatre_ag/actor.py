@@ -153,9 +153,17 @@ class Actor(object):
         self.waiting_for_tick.set()
 
     def start(self):
-        self.thread.start()
+        if not self.thread.is_alive():
+            self.thread.start()
 
     def shutdown(self):
+        """
+        Instructs the actor to shutdown as soon as no further tasks are available and then blocks until the actor's
+        shutdown is complete.  This method will block indefinitely if the actor's clock is controlled from the same
+        thread as the call to shutdown().  Instead, call `initiate_shutdown`, ensure that the clock provides sufficient
+        ticks to complete any remaining tasks and then call `wait_for_shutdown`.
+        :return:
+        """
         self.initiate_shutdown()
         self.wait_for_shutdown()
 

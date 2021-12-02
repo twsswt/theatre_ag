@@ -117,3 +117,10 @@ class ActorTestCase(TestCase):
 
         self.assertEqual('task_b()[0->2]', str(self.actor.last_task))
 
+    def test_start_twice(self):
+        self.actor.start()
+        self.actor.start()
+        self.actor.initiate_shutdown()
+        self.clock.tick()
+        self.actor.wait_for_shutdown()
+
