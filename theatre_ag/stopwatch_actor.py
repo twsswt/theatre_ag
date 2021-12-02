@@ -18,20 +18,24 @@ class _StopwatchWorkflow:
     def _calculate_next_time_period(self):
         return max(self._precision(self._granularity), 1)
 
-    def issue_tick_to_parent_clock(self, time_period):
-        self.idling.idle_for(time_period)
-        next_time_period = self._calculate_next_time_period()
+    def _issue_tick_to_parent_clock(self):
 
-        if not self.watched_clock.will_tick_another(next_time_period):
-            self._parent_clock.max_ticks = self._parent_clock.current_tick + 1
+        time_period = self._calculate_next_time_period()
+
+        for _ in range(0, time_period):
+            if self.watched_clock.will_tick_again:
+                self.idling.idle()
+            else:
+                self._parent_clock.max_ticks = self._parent_clock.current_tick
+                break
+
         self._parent_clock.tick()
 
-        return next_time_period
-
     def issue_tick(self):
-        time_period = self._calculate_next_time_period()
-        while self.watched_clock.will_tick_another(time_period):
-            time_period = self.issue_tick_to_parent_clock(time_period)
+        while self.watched_clock.will_tick_again:
+            self._issue_tick_to_parent_clock()
+        self._parent_clock.max_ticks = self._parent_clock.current_tick
+        self._parent_clock.tick()
 
 
 class StopwatchActor(TaskQueueActor):

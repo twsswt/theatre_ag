@@ -31,7 +31,8 @@ class SynchronizingClock(object):
 
     def shutdown(self):
         self.issue_ticks = False
-        self._thread.join()
+        if self._thread.is_alive():
+            self._thread.join()
 
     def wait_for_last_tick(self):
         self._thread.join()
