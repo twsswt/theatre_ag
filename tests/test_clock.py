@@ -13,13 +13,12 @@ class ClockTestCase(unittest.TestCase):
         self.clock = SynchronizingClock(max_ticks=2)
 
         self.tick_listener = Mock()
-        self.tick_listener.waiting_for_tick = Mock(spec=Event)
 
         self.clock.add_tick_listener(self.tick_listener)
 
         self.clock.tick()
 
-        self.tick_listener.waiting_for_tick.wait.assert_called_once_with()
+        self.tick_listener.wait_for_tick.assert_called_once_with()
         self.tick_listener.notify_new_tick.assert_called_once_with()
 
     def test_ticks_until_stopped(self):

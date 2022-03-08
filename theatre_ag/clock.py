@@ -64,7 +64,7 @@ class SynchronizingClock(object):
         cached_tick_listeners = self.get_cache_of_tick_listeners()
 
         for tick_listener in cached_tick_listeners:
-            tick_listener.waiting_for_tick.wait()
+            tick_listener.wait_for_tick()
 
         self._ticks += 1
 
