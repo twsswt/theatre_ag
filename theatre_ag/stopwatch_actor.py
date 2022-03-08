@@ -34,6 +34,8 @@ class _StopwatchWorkflow:
     def issue_tick(self):
         while self.watched_clock.will_tick_again:
             self._issue_tick_to_parent_clock()
+
+        # Ensures clean shutdown of clock ticking.
         self._parent_clock.max_ticks = self._parent_clock.current_tick
         self._parent_clock.tick()
 
