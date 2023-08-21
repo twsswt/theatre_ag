@@ -19,7 +19,7 @@ class Task(object):
                 self.workflow = entry_point.__self__
 
             elif entry_point.__closure__ is not None:
-                self.workflow = entry_point.__closure__[2].cell_contents
+                self.workflow = entry_point.__closure__[-1].cell_contents
 
             else:
 
