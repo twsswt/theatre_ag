@@ -41,23 +41,20 @@ def treat_as_workflow(workflow_class):
 
         attribute = reference_get_attr(self, item)
 
-        if hasattr(attribute, 'func_name') and attribute.func_name[0:2] == '__':
+        if hasattr(attribute, '__func__') and attribute.__func__.__name__[0:2] == '__':
             return attribute
 
         elif inspect.ismethod(attribute) or inspect.isfunction(attribute):
-
             def sync_wrap(*args, **kwargs):
                 current_thread = threading.current_thread()
                 if hasattr(current_thread, 'actor'):
                     actor = current_thread.actor
-
                     actor.busy.acquire()
                     actor.log_task_initiation(attribute, self, args)
 
                     # TODO Pass function name and indicative cost to a cost calculation function.
 
                     actor.incur_delay(attribute, self, args)
-
                     actor.wait_for_turn()
 
                     try:
