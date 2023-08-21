@@ -32,8 +32,8 @@ class Actor(object):
 
         self.tick_received = Event()
         self.tick_received.clear()
-        self.waiting_for_tick = Event()
-        self.waiting_for_tick.clear()
+        self._waiting_for_tick = Event()
+        self._waiting_for_tick.clear()
 
         self.busy = RLock()
         self.wait_for_directions = True
@@ -150,7 +150,7 @@ class Actor(object):
 
         # Ensure that clock can proceed for other listeners.
         self.clock.remove_tick_listener(self)
-        self.waiting_for_tick.set()
+        self._waiting_for_tick.set()
 
     def start(self):
         if not self.thread.is_alive():
@@ -201,14 +201,17 @@ class Actor(object):
 
         while self.clock.current_tick < self.next_turn:
             if self.clock.will_tick_again:
-                self.waiting_for_tick.set()
+                self._waiting_for_tick.set()
                 self.tick_received.wait()
                 self.tick_received.clear()
             else:
                 raise OutOfTurnsException(self)
 
+    def wait_for_tick(self):
+        self._waiting_for_tick.wait()
+
     def notify_new_tick(self):
-        self.waiting_for_tick.clear()
+        self._waiting_for_tick.clear()
         self.tick_received.set()
 
     def __str__(self):
