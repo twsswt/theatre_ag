@@ -3,9 +3,6 @@ from unittest.mock import Mock
 
 from theatre_ag import SynchronizingClock
 
-# noinspection PyProtectedMember
-from threading import Event
-
 
 class ClockTestCase(unittest.TestCase):
 

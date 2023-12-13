@@ -89,7 +89,7 @@ class Actor(object):
 
                 result += recursive_task_count(completed_task.sub_tasks)
 
-                if filter is None or task_filter(completed_task):
+                if task_filter is None or task_filter(completed_task):
                     result += 1
 
             return result

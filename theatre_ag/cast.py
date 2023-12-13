@@ -1,6 +1,6 @@
 class Cast(object):
     """
-    A set of actors who synchronize their actions on a single clock.
+    A set of actors.
     """
 
     def __init__(self, members=None):
@@ -11,7 +11,7 @@ class Cast(object):
 
     def get_member(self, name):
         for member in self.members:
-            if member.name == name:
+            if member.logical_name == name:
                 return member
         return None
 

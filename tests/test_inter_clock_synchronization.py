@@ -3,7 +3,7 @@ import unittest
 from theatre_ag import SynchronizingClock, InterClockSynchronization
 
 
-class InterClockSynchoniziationTestCase(unittest.TestCase):
+class InterClockSynchronizationTestCase(unittest.TestCase):
 
     def test_one_minute_tick_after_60_seconds(self):
         seconds_clock = SynchronizingClock(max_ticks=60)
