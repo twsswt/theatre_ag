@@ -1,0 +1,12 @@
+stages:
+  - test
+
+tests:
+  tags:
+    - docker
+  stage: test
+  image: python:3.9
+  script:
+    - pip install -r requirements.txt
+    - python -m unittest tests
+
